@@ -1,0 +1,39 @@
+import type { Metadata } from "next";
+import { AuthShell } from "@/components/auth/auth-shell";
+import { SignupForm } from "@/components/auth/signup-form";
+import { TrainerFlowBanner } from "@/components/auth/trainer-flow-banner";
+import { getTrainerById } from "@/lib/mock-trainers";
+export const metadata: Metadata = {
+    title: "Create account",
+    description: "Create a FitBook AI client or coach account (demo).",
+};
+function pickString(value: string | string[] | undefined): string | undefined {
+    if (typeof value === "string" && value.length > 0)
+        return value;
+    if (Array.isArray(value) && typeof value[0] === "string" && value[0].length > 0)
+        return value[0];
+    return undefined;
+}
+type SignupPageProps = {
+    searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
+export default async function SignupPage({ searchParams }: SignupPageProps) {
+    const sp = await searchParams;
+    const trainerSlug = pickString(sp.trainer);
+    const intentRaw = pickString(sp.intent);
+    const isTrainerIntent = intentRaw === "trainer";
+    const trainer = !isTrainerIntent && trainerSlug ? getTrainerById(trainerSlug) : undefined;
+    const title = isTrainerIntent ? "Create a coach workspace" : "Create your client account";
+    const description = isTrainerIntent
+        ? "Portfolio demo: same local sign-up as clients for now. Later this unlocks coach-only finance, calendar, and client lists."
+        : "Find coaches, book with AI-assisted scheduling, and track your progress — data stays in this browser until you wire a backend.";
+    return (<AuthShell title={title} description={description} footer={<p>
+          By continuing you agree to placeholder terms for this portfolio build.{" "}
+          <a href="/coaches" className="font-medium text-primary underline-offset-4 hover:underline">
+            Browse coaches
+          </a>
+        </p>}>
+      {trainer ? <TrainerFlowBanner mode="signup" trainer={trainer}/> : null}
+      <SignupForm accountKind={isTrainerIntent ? "trainer" : "client"} trainerId={trainer?.id}/>
+    </AuthShell>);
+}

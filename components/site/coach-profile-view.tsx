@@ -142,7 +142,10 @@ export function CoachProfileView({ trainer }: CoachProfileViewProps) {
             <MessageCircle className="size-5 text-primary" aria-hidden/>
             <h2 className="text-lg font-semibold tracking-tight sm:text-xl">Client reviews</h2>
           </div>
-          <div className="grid min-w-0 gap-4 md:grid-cols-2">
+          <motion.div className="grid min-w-0 gap-4 md:grid-cols-2">
+            {trainer.reviews.length === 0 ? (
+              <p className="text-sm text-muted-foreground md:col-span-2">No reviews yet.</p>
+            ) : null}
             {trainer.reviews.map((r, i) => (<motion.div key={r.id} initial={{ opacity: 0, y: 8 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.06 * i, duration: 0.35 }}>
                 <Card className="h-full border-border/80 shadow-sm transition-shadow hover:shadow-md">
                   <CardHeader className="pb-2">
@@ -160,7 +163,7 @@ export function CoachProfileView({ trainer }: CoachProfileViewProps) {
                   </CardContent>
                 </Card>
               </motion.div>))}
-          </div>
+          </motion.div>
         </motion.section>
 
         <motion.section className="space-y-5" initial="hidden" whileInView="show" viewport={{ once: true, margin: "-40px" }} variants={fade} custom={3}>
@@ -171,6 +174,11 @@ export function CoachProfileView({ trainer }: CoachProfileViewProps) {
             </div>
           </div>
           <div className="grid min-w-0 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {trainer.services.length === 0 ? (
+              <p className="text-sm text-muted-foreground sm:col-span-2 lg:col-span-3">
+                No services listed yet.
+              </p>
+            ) : null}
             {trainer.services.map((s, i) => (<motion.div key={s.id} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.05 * i, duration: 0.35 }}>
                 <Card className="h-full border-border/80 shadow-sm transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-md">
                   <CardHeader>

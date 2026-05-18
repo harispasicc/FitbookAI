@@ -23,8 +23,7 @@ export function DashboardTopBar({ onMenuClick, showBrandInNavbar, }: {
     const router = useRouter();
     const { user, logout } = useAuth();
     function handleLogout() {
-        logout();
-        router.replace("/");
+        void logout().then(() => router.replace("/"));
     }
     return (<header className="sticky top-0 z-30 flex min-h-14 min-w-0 shrink-0 items-center gap-2 border-b border-border bg-background/95 px-2 py-1.5 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:gap-3 sm:px-3 sm:py-0 md:gap-4 md:px-4">
       <Button type="button" variant="ghost" size="icon" className="size-10 shrink-0 touch-manipulation lg:hidden" onClick={onMenuClick} aria-label="Open navigation">

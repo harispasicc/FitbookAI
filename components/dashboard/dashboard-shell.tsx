@@ -42,10 +42,10 @@ export function DashboardShell({ children }: {
     const [mobileOpen, setMobileOpen] = useState(false);
     const [collapsed, setCollapsed] = useState(false);
     function handleLogout() {
-        const postLogout = "/";
-        logout();
-        setMobileOpen(false);
-        router.replace(postLogout);
+        void logout().then(() => {
+            setMobileOpen(false);
+            router.replace("/");
+        });
     }
     function toggleCollapsed() {
         setCollapsed((current) => !current);

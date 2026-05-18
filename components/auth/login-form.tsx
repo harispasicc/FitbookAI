@@ -16,6 +16,7 @@ export function LoginForm({ trainerId, variant = "client" }: LoginFormProps) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [portalError, setPortalError] = useState<string | null>(null);
+    const [submitting, setSubmitting] = useState(false);
     const isTrainerPortal = variant === "trainer";
     const signupHref = isTrainerPortal
         ? "/signup?intent=trainer"
@@ -24,22 +25,29 @@ export function LoginForm({ trainerId, variant = "client" }: LoginFormProps) {
             : "/signup";
     const otherLoginHref = isTrainerPortal ? "/login" : "/trainer/login";
     const otherLoginLabel = isTrainerPortal ? "Client sign in" : "Coach sign in";
-    function onSubmit(e: React.FormEvent) {
+    async function onSubmit(e: React.FormEvent) {
         e.preventDefault();
         setPortalError(null);
-        const result = login(email, password, {
-            selectedTrainerId: !isTrainerPortal && trainerId ? trainerId : undefined,
-            expectedRole: isTrainerPortal ? "trainer" : "client",
-        });
-        if (!result.ok) {
-            if (result.reason === "role_mismatch") {
-                setPortalError(result.existingRole === "trainer"
-                    ? "This email is already a coach account. Use coach sign in instead."
-                    : "This email is a client account. Use client sign in instead.");
+        setSubmitting(true);
+        try {
+            const result = await login(email, password, {
+                selectedTrainerId: !isTrainerPortal && trainerId ? trainerId : undefined,
+                expectedRole: isTrainerPortal ? "trainer" : "client",
+            });
+            if (!result.ok) {
+                if (result.reason === "role_mismatch") {
+                    setPortalError(result.existingRole === "trainer"
+                        ? "This email is already a coach account. Use coach sign in instead."
+                        : "This email is a client account. Use client sign in instead.");
+                } else {
+                    setPortalError(result.message ?? "Invalid email or password.");
+                }
+                return;
             }
-            return;
+            router.push(result.user.role === "trainer" ? "/dashboard" : "/me");
+        } finally {
+            setSubmitting(false);
         }
-        router.push(result.user.role === "trainer" ? "/dashboard" : "/me");
     }
     if (!isHydrated) {
         return (<div className="space-y-4">
@@ -60,8 +68,7 @@ export function LoginForm({ trainerId, variant = "client" }: LoginFormProps) {
         </p>
         <div className="flex flex-col gap-2 sm:flex-row">
           <Button type="button" variant="outline" className="flex-1" onClick={() => {
-                logout();
-                router.replace("/");
+                void logout().then(() => router.replace("/"));
             }}>
             Sign out
           </Button>
@@ -89,10 +96,10 @@ export function LoginForm({ trainerId, variant = "client" }: LoginFormProps) {
         <Label htmlFor="password">Password</Label>
         <Input id="password" name="password" type="password" autoComplete="current-password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required/>
         <p className="text-xs text-muted-foreground">
-          Password is not verified — prototype sign-in. Nothing is sent to a server.
+          Password must match your registered account (min. 8 characters).
         </p>
       </div>
-      <Button type="submit" className="w-full">
+      <Button type="submit" className="w-full" disabled={submitting}>
         {isTrainerPortal ? "Coach sign in" : "Client sign in"}
       </Button>
       <p className="text-center text-sm text-muted-foreground">

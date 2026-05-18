@@ -52,9 +52,10 @@ export function ClientShell({ children }: {
         setMobileOpen(false);
     }, [pathname]);
     function handleLogout() {
-        logout();
-        setMobileOpen(false);
-        router.replace("/");
+        void logout().then(() => {
+            setMobileOpen(false);
+            router.replace("/");
+        });
     }
     return (<div className="flex min-h-dvh min-w-0 w-full items-stretch bg-background text-foreground">
       {mobileOpen ? (<button type="button" className="fixed inset-0 z-40 bg-black/30 backdrop-blur-[1px] lg:hidden" aria-label="Close menu" onClick={() => setMobileOpen(false)}/>) : null}

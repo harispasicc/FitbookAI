@@ -16,18 +16,30 @@ export function SignupForm({ accountKind, trainerId }: SignupFormProps) {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [formError, setFormError] = useState<string | null>(null);
+    const [submitting, setSubmitting] = useState(false);
     const loginHref = accountKind === "trainer"
         ? "/trainer/login"
         : accountKind === "client" && trainerId
             ? `/login?trainer=${encodeURIComponent(trainerId)}`
             : "/login";
-    function onSubmit(e: React.FormEvent) {
+    async function onSubmit(e: React.FormEvent) {
         e.preventDefault();
-        const next = signup(name, email, password, {
-            role: accountKind === "trainer" ? "trainer" : "client",
-            selectedTrainerId: accountKind === "client" && trainerId ? trainerId : undefined,
-        });
-        router.push(next.role === "trainer" ? "/dashboard" : "/me");
+        setFormError(null);
+        setSubmitting(true);
+        try {
+            const result = await signup(name, email, password, {
+                role: accountKind === "trainer" ? "trainer" : "client",
+                selectedTrainerId: accountKind === "client" && trainerId ? trainerId : undefined,
+            });
+            if (!result.ok) {
+                setFormError(result.message);
+                return;
+            }
+            router.push(result.user.role === "trainer" ? "/dashboard" : "/me");
+        } finally {
+            setSubmitting(false);
+        }
     }
     if (!isHydrated) {
         return (<div className="space-y-4">
@@ -48,8 +60,7 @@ export function SignupForm({ accountKind, trainerId }: SignupFormProps) {
         </p>
         <div className="flex flex-col gap-2 sm:flex-row">
           <Button type="button" variant="outline" className="flex-1" onClick={() => {
-                logout();
-                router.replace("/");
+                void logout().then(() => router.replace("/"));
             }}>
             Sign out
           </Button>
@@ -60,6 +71,9 @@ export function SignupForm({ accountKind, trainerId }: SignupFormProps) {
       </div>);
     }
     return (<form className="space-y-4" onSubmit={onSubmit}>
+      {formError ? (<div className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          {formError}
+        </div>) : null}
       <div className="space-y-2">
         <Label htmlFor="name">Full name</Label>
         <Input id="name" name="name" autoComplete="name" placeholder="Alex Morgan" value={name} onChange={(e) => setName(e.target.value)} required/>
@@ -72,10 +86,10 @@ export function SignupForm({ accountKind, trainerId }: SignupFormProps) {
         <Label htmlFor="password">Password</Label>
         <Input id="password" name="password" type="password" autoComplete="new-password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required/>
         <p className="text-xs text-muted-foreground">
-          Sign up saves your profile in this browser only (localStorage).
+          Coach accounts appear on the marketplace after signup. Password must be at least 8 characters.
         </p>
       </div>
-      <Button type="submit" className="w-full">
+      <Button type="submit" className="w-full" disabled={submitting}>
         {accountKind === "trainer" ? "Create coach account" : "Create client account"}
       </Button>
       <p className="text-center text-sm text-muted-foreground">

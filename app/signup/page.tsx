@@ -25,8 +25,8 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
     const trainer = !isTrainerIntent && trainerSlug ? getTrainerById(trainerSlug) : undefined;
     const title = isTrainerIntent ? "Create a coach workspace" : "Create your client account";
     const description = isTrainerIntent
-        ? "Portfolio demo: same local sign-up as clients for now. Later this unlocks coach-only finance, calendar, and client lists."
-        : "Find coaches, book with AI-assisted scheduling, and track your progress — data stays in this browser until you wire a backend.";
+        ? "Create your coach workspace — your profile is saved to FitBook and listed on the marketplace."
+        : "Find coaches, book sessions, and track your progress with your FitBook client account.";
     return (<AuthShell title={title} description={description} footer={<p>
           By continuing you agree to placeholder terms for this portfolio build.{" "}
           <a href="/coaches" className="font-medium text-primary underline-offset-4 hover:underline">

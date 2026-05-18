@@ -5,7 +5,6 @@ import { useDeferredValue, useEffect, useMemo, useState, useTransition } from "r
 import { AnimatePresence, motion, LayoutGroup } from "framer-motion";
 import { MapPin, Monitor, Search, SlidersHorizontal, Sparkles, Star, Store, X } from "lucide-react";
 import type { MockTrainer } from "@/lib/mock-trainers";
-import { MOCK_TRAINERS } from "@/lib/mock-trainers";
 import type { DeliveryMode } from "@/lib/mock-trainers";
 import { COACH_SPECIALIZATIONS, SPECIALIZATION_GROUPS } from "@/lib/coach-specializations";
 import { trainerAvatarUrls } from "@/lib/media-urls";
@@ -49,7 +48,12 @@ function deliveryLabel(modes: DeliveryMode[]) {
         return "Online";
     return "In person";
 }
-export function BrowseCoachesView() {
+type BrowseCoachesViewProps = {
+    coaches: MockTrainer[];
+    loadError?: string | null;
+};
+
+export function BrowseCoachesView({ coaches, loadError = null }: BrowseCoachesViewProps) {
     const [query, setQuery] = useState("");
     const deferredQuery = useDeferredValue(query);
     const [delivery, setDelivery] = useState<DeliveryFilter>("all");
@@ -58,16 +62,18 @@ export function BrowseCoachesView() {
     const [showAllSpecs, setShowAllSpecs] = useState(false);
     const [isPending, startTransition] = useTransition();
     const [mounted, setMounted] = useState(false);
+
     useEffect(() => {
         const t = setTimeout(() => setMounted(true), 120);
         return () => clearTimeout(t);
     }, []);
+
     const filtered = useMemo(() => {
-        return MOCK_TRAINERS.filter((t) => coachMatchesSearch(t, deferredQuery) &&
+        return coaches.filter((t) => coachMatchesSearch(t, deferredQuery) &&
             coachMatchesDelivery(t, delivery) &&
             coachMatchesRating(t, rating) &&
             coachMatchesSpecs(t, specs));
-    }, [deferredQuery, delivery, rating, specs]);
+    }, [coaches, deferredQuery, delivery, rating, specs]);
     function toggleSpec(sp: string) {
         startTransition(() => {
             setSpecs((prev) => {
@@ -88,7 +94,7 @@ export function BrowseCoachesView() {
         <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">Marketplace</p>
         <h1 className="text-balance text-2xl font-semibold tracking-tight sm:text-3xl md:text-4xl">Find your coach</h1>
         <p className="text-pretty text-sm text-muted-foreground sm:text-base">
-          Search by goal, filter by specialty and how you want to train — then open a profile to book (demo data).
+          Search by goal, filter by specialty and how you want to train — then open a profile to book.
         </p>
       </motion.div>
 
@@ -156,6 +162,11 @@ export function BrowseCoachesView() {
             {specs.size > 1 ? "s" : ""}
           </>) : null}
       </p>
+
+      {loadError ? (<div className="rounded-2xl border border-destructive/30 bg-destructive/5 px-6 py-8 text-center">
+          <p className="text-sm font-medium text-foreground">Could not load coaches</p>
+          <p className="mt-2 text-sm text-muted-foreground">{loadError}</p>
+        </div>) : null}
 
       {!mounted ? (<ul className="grid min-w-0 gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-hidden>
           {Array.from({ length: 6 }).map((_, i) => (<li key={i} className="h-[340px] animate-pulse rounded-2xl border border-border/60 bg-muted/40"/>))}

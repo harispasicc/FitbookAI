@@ -1,0 +1,103 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  CLIENT
+  TRAINER
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String?
+  role      UserRole @default(CLIENT)
+
+  clientProfile  ClientProfile?
+  trainerProfile TrainerProfile?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ClientProfile {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  fullName String?
+}
+
+model TrainerProfile {
+  id        String  @id @default(cuid())
+  userId    String  @unique
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fullName  String?
+  bio       String?
+  specialty String?
+
+  services              TrainerService[]
+  reviews               TrainerReview[]
+  weeklyAvailability    TrainerWeeklyAvailability[]
+  availabilitySlots     TrainerAvailabilitySlot[]
+}
+
+model TrainerService {
+  id               String         @id @default(cuid())
+  trainerProfileId String
+  trainerProfile   TrainerProfile @relation(fields: [trainerProfileId], references: [id], onDelete: Cascade)
+
+  title           String
+  description     String?
+  durationMinutes Int
+  priceCents      Int
+  isActive        Boolean @default(true)
+  sortOrder       Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([trainerProfileId, isActive, sortOrder])
+}
+
+model TrainerReview {
+  id               String         @id @default(cuid())
+  trainerProfileId String
+  trainerProfile   TrainerProfile @relation(fields: [trainerProfileId], references: [id], onDelete: Cascade)
+
+  authorName String
+  rating     Int
+  comment    String?
+
+  createdAt DateTime @default(now())
+
+  @@index([trainerProfileId, createdAt])
+}
+
+model TrainerWeeklyAvailability {
+  id               String         @id @default(cuid())
+  trainerProfileId String
+  trainerProfile   TrainerProfile @relation(fields: [trainerProfileId], references: [id], onDelete: Cascade)
+
+  dayOfWeek Int
+  startTime String
+  endTime   String
+
+  @@index([trainerProfileId, dayOfWeek])
+}
+
+model TrainerAvailabilitySlot {
+  id               String         @id @default(cuid())
+  trainerProfileId String
+  trainerProfile   TrainerProfile @relation(fields: [trainerProfileId], references: [id], onDelete: Cascade)
+
+  startsAt DateTime
+  endsAt   DateTime
+  isBooked Boolean  @default(false)
+
+  @@index([trainerProfileId, startsAt])
+}

@@ -33,8 +33,7 @@ export function SitePublicHeader() {
         return { links: TRAINER_AUTH_LINKS, logoHref: "/dashboard", showLogout: true };
     }, [user, isHydrated]);
     function handleLogout() {
-        logout();
-        router.replace("/");
+        void logout().then(() => router.replace("/"));
     }
     const trailingSlot = showLogout ? (<>
       <Button type="button" variant="outline" size="sm" className="hidden rounded-lg md:inline-flex" onClick={handleLogout}>

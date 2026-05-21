@@ -1,6 +1,5 @@
 import { test, expect } from "@playwright/test";
 import {
-  cancelBooking,
   createApiContext,
   createBooking,
   expectReviewConflict,
@@ -54,8 +53,6 @@ test.describe("Review business rules", () => {
 
       await submitReview(client, pending.id, 5, "E2E review");
       await expectReviewConflict(client, pending.id);
-
-      await cancelBooking(client, pending.id);
     } finally {
       await client.dispose();
       await trainer.dispose();

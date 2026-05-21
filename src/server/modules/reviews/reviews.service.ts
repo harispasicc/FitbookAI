@@ -22,7 +22,7 @@ export const reviewsService = {
     }
 
     if (booking.status !== "COMPLETED") {
-      throw ApiError.validation(
+      throw ApiError.unprocessableEntity(
         "You can review a session after your coach marks it completed",
       );
     }

@@ -32,19 +32,27 @@ test.describe("Booking lifecycle", () => {
       await patchBooking(trainerApi, booking.id, { status: "confirmed" });
 
       await clientPage.goto("/me/sessions");
-      await expect(clientPage.getByText(booking.service.title)).toBeVisible();
-      await expect(
-        clientPage.getByText(/confirmed/i).first(),
-      ).toBeVisible();
+      const sessionWhen = new Date(booking.startsAt).toLocaleString(undefined, {
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+      });
+      const sessionRow = clientPage
+        .getByRole("row")
+        .filter({ hasText: booking.service.title })
+        .filter({ hasText: sessionWhen });
+      await expect(sessionRow).toHaveCount(1);
+      await expect(sessionRow).toContainText(/confirmed/i);
 
       await patchBooking(trainerApi, booking.id, { status: "completed" });
 
       await clientPage.reload();
-      await expect(
-        clientPage.getByRole("button", { name: "Rate session" }),
-      ).toBeVisible();
+      await expect(sessionRow).toContainText(/completed/i);
+      const rateButton = sessionRow.getByRole("button", { name: "Rate session" });
+      await expect(rateButton).toBeVisible();
 
-      await clientPage.getByRole("button", { name: "Rate session" }).click();
+      await rateButton.click();
       await expect(
         clientPage.getByRole("heading", { name: "Rate your session" }),
       ).toBeVisible();
@@ -52,9 +60,7 @@ test.describe("Booking lifecycle", () => {
         .getByLabel("Comment (optional)")
         .fill("E2E: strong session, would book again.");
       await clientPage.getByRole("button", { name: "Submit review" }).click();
-      await expect(
-        clientPage.getByRole("button", { name: "Rate session" }),
-      ).toHaveCount(0);
+      await expect(rateButton).toHaveCount(0);
 
       await trainerPage.goto("/calendar");
       await expect(trainerPage.getByText(/completed/i).first()).toBeVisible();

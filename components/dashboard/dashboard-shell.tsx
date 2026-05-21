@@ -43,7 +43,7 @@ export function DashboardShell({ children }: {
     const pathname = usePathname();
     const router = useRouter();
     const { logout } = useAuth();
-    const { canAccessRoute } = useTrainerPlan();
+    const { canAccessRoute, planContext } = useTrainerPlan();
     const [mobileOpen, setMobileOpen] = useState(false);
     const [collapsed, setCollapsed] = useState(false);
     function handleLogout() {

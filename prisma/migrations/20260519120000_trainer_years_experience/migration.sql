@@ -1,0 +1,1 @@
+ALTER TABLE "TrainerProfile" ADD COLUMN "yearsExperience" INTEGER NOT NULL DEFAULT 0;

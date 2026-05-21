@@ -5,13 +5,7 @@ import { BrandLogoLink } from "@/components/site/brand-logo-link";
 import { SiteHeaderNav, type SiteHeaderNavLink } from "@/components/site/site-header-nav";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/auth-context";
-const GUEST_LINKS: SiteHeaderNavLink[] = [
-    { href: "/coaches", label: "Find coaches" },
-    { href: "/pricing", label: "How it works" },
-    { href: "/login", label: "Client sign in" },
-    { href: "/trainer/login", label: "Coach sign in" },
-    { href: "/signup", label: "Create account", variant: "primary" },
-];
+import { GUEST_NAV_LINKS } from "@/lib/site-nav";
 const CLIENT_AUTH_LINKS: SiteHeaderNavLink[] = [
     { href: "/me", label: "My FitBook" },
     { href: "/coaches", label: "Find coaches" },
@@ -25,7 +19,7 @@ export function SitePublicHeader() {
     const router = useRouter();
     const { links, logoHref, showLogout } = useMemo(() => {
         if (!isHydrated || !user) {
-            return { links: GUEST_LINKS, logoHref: "/", showLogout: false };
+            return { links: GUEST_NAV_LINKS, logoHref: "/", showLogout: false };
         }
         if (user.role === "client") {
             return { links: CLIENT_AUTH_LINKS, logoHref: "/me", showLogout: true };

@@ -85,7 +85,7 @@ export function HowItWorksContent() {
             <p className="text-xs font-semibold uppercase tracking-wide text-primary">For clients</p>
             <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">Three simple steps</h2>
             <p className="mt-2 text-sm text-muted-foreground sm:text-base">
-              From discovery to progress — without wading through pricing jargon.
+              From discovery to progress, without wading through pricing jargon.
             </p>
           </div>
           <div className="grid min-w-0 gap-4 md:grid-cols-3 md:gap-6">

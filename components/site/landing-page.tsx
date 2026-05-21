@@ -8,11 +8,12 @@ import { LandingPlatformSection } from "@/components/site/landing-platform-secti
 import { LandingTestimonials } from "@/components/site/landing-testimonials";
 import { SiteFooter } from "@/components/site/site-footer";
 import { fitnessImages, trainerAvatarUrls } from "@/lib/media-urls";
+import { GUEST_NAV_LINKS } from "@/lib/site-nav";
 const features = [
     { title: "Smart booking", desc: "Availability-aware scheduling without spreadsheet chaos.", icon: CalendarDays },
     { title: "AI assistant", desc: "Draft reminders, suggest slots, and answer routine questions.", icon: Sparkles },
     { title: "Client management", desc: "Goals, notes, and session history in one calm view.", icon: Users },
-    { title: "Analytics", desc: "Bookings, revenue, retention — the metrics that matter.", icon: BarChart3 },
+    { title: "Analytics", desc: "Bookings, revenue, retention: the metrics that matter.", icon: BarChart3 },
     { title: "Availability calendar", desc: "Daily and weekly views built for real-world gyms.", icon: LayoutGrid },
     { title: "Automated reminders", desc: "Reduce no-shows with timely, human-sounding messages.", icon: Bell },
 ];
@@ -21,13 +22,7 @@ export function LandingPage() {
       <header className="sticky top-0 z-[100] border-b border-border/80 bg-background/95 backdrop-blur-md">
         <div className="mx-auto flex w-full max-w-6xl min-h-[5.25rem] items-center gap-3 px-4 py-2 sm:min-h-28 sm:gap-4 sm:px-6 sm:py-3">
           <BrandLogoLink size="nav"/>
-          <SiteHeaderNav links={[
-            { href: "/coaches", label: "Find coaches" },
-            { href: "/pricing", label: "How it works" },
-            { href: "/login", label: "Client sign in" },
-            { href: "/trainer/login", label: "Coach sign in" },
-            { href: "/signup", label: "Create account", variant: "primary" },
-        ]}/>
+          <SiteHeaderNav links={GUEST_NAV_LINKS}/>
         </div>
       </header>
 
@@ -41,7 +36,7 @@ export function LandingPage() {
               Find your coach, book smarter, track your progress
             </h1>
             <p className="max-w-xl text-pretty text-base text-muted-foreground sm:text-lg">
-              Browse coaches by style — yoga, strength, cardio, CrossFit, definition, and more. AI helps you pick
+              Browse coaches by style: yoga, strength, cardio, CrossFit, definition, and more. AI helps you pick
               slots that fit your coach&apos;s calendar, and your dashboard keeps sessions and progress in one place.
             </p>
             <div className="flex flex-wrap items-center gap-4">
@@ -49,7 +44,7 @@ export function LandingPage() {
                 {trainerAvatarUrls.slice(0, 4).map((src, i) => (<Image key={`trainer-avatar-${i}`} src={src} alt="" width={40} height={40} className="size-10 rounded-full border-2 border-background object-cover shadow-sm" sizes="40px"/>))}
               </div>
               <p className="text-xs text-muted-foreground">
-                Real coaches you can filter by goal — demo profiles to explore the experience.
+                Real coaches you can filter by goal. Try demo profiles to explore the experience.
               </p>
             </div>
             <div className="relative min-w-0 overflow-hidden rounded-2xl border border-border/80 shadow-md">
@@ -64,9 +59,25 @@ export function LandingPage() {
                 Client sign in
               </Link>
             </div>
-            <p className="text-xs text-muted-foreground">Create an account after you pick a coach — no card for the demo flow.</p>
+            <p className="text-xs text-muted-foreground">
+              Demo mode with pre-seeded accounts.{" "}
+              <Link href="/login" className="font-medium text-primary underline-offset-2 hover:underline">
+                Try client demo
+              </Link>
+              {" · "}
+              <Link
+                href="/trainer/login"
+                className="font-medium text-primary underline-offset-2 hover:underline"
+              >
+                Coach demo
+              </Link>
+            </p>
           </div>
-          <LandingDashboardPreview idPrefix="hero"/>
+          <LandingDashboardPreview
+            idPrefix="hero"
+            photoSrc={fitnessImages.heroSession}
+            photoAlt="Coach leading a small group session"
+          />
         </section>
 
         <section className="border-y border-border/80 bg-muted/30 py-10 sm:py-12">
@@ -113,7 +124,7 @@ export function LandingPage() {
                 <Image src={fitnessImages.coachClipboard} alt="Coach planning sessions" fill className="object-cover" sizes="(max-width: 1024px) 100vw, 50vw"/>
                 <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent"/>
                 <p className="absolute bottom-4 left-4 right-4 max-w-sm text-sm font-medium text-foreground drop-shadow">
-                  KPIs, retention, and revenue — tuned for boutique studios and solo pros.
+                  KPIs, retention, and revenue tuned for boutique studios and solo pros.
                 </p>
               </div>
               <LandingDashboardPreview idPrefix="mid"/>
@@ -125,7 +136,7 @@ export function LandingPage() {
           <div className="mb-8 max-w-2xl space-y-3 sm:mb-10">
             <h2 className="text-balance text-2xl font-semibold tracking-tight sm:text-3xl">AI that feels practical</h2>
             <p className="text-muted-foreground">
-              Not neon sci-fi — a simple chat surface coaches can trust day to day.
+              Not neon sci-fi. A simple chat surface coaches can trust day to day.
             </p>
           </div>
           <div className="mx-auto mb-6 max-w-2xl overflow-hidden rounded-2xl border border-border/80 shadow-md">

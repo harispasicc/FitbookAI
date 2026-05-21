@@ -15,6 +15,8 @@ type CoachStats = {
   averageRating: number | null;
   reviewCount: number;
   serviceCount: number;
+  minPriceCents: number | null;
+  yearsExperience: number;
 };
 
 function formatPriceCents(cents: number): string {
@@ -45,6 +47,7 @@ export function toCoachListItemDto(
     fullName: coach.fullName,
     bio: coach.bio,
     specialty: coach.specialty,
+    yearsExperience: coach.yearsExperience,
     user: coach.user,
     stats,
   };
@@ -106,6 +109,7 @@ export function toCoachAvailabilityDto(
     weekly: weeklySchedule,
     upcomingSlots: slots.map((slot) => ({
       id: slot.id,
+      serviceId: slot.serviceId,
       startsAt: slot.startsAt.toISOString(),
       endsAt: slot.endsAt.toISOString(),
       isBooked: slot.isBooked,

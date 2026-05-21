@@ -13,10 +13,10 @@ type BrandLogoLinkProps = {
 };
 function defaultAriaLabel(href: string) {
     if (href === "/me")
-        return "FitBook AI — my app";
+        return "FitBook AI, my app";
     if (href === "/dashboard")
-        return "FitBook AI — coach dashboard";
-    return "FitBook AI — home";
+        return "FitBook AI, coach dashboard";
+    return "FitBook AI, home";
 }
 export function BrandLogoLink({ size = "nav", className, href = "/", caption, onClick, ariaLabel, }: BrandLogoLinkProps) {
     const markClass = size === "footer"

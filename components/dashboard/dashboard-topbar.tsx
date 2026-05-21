@@ -1,11 +1,12 @@
 "use client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Bell, CalendarPlus, LogOut, Menu, Search, User } from "lucide-react";
+import { CalendarPlus, LogOut, Menu, User } from "lucide-react";
+import { DashboardNotifications } from "@/components/dashboard/dashboard-notifications";
+import { DashboardSearch } from "@/components/dashboard/dashboard-search";
 import { useAuth } from "@/contexts/auth-context";
 import { BrandLogoLink } from "@/components/site/brand-logo-link";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, } from "@/components/ui/dropdown-menu";
 function initials(name: string) {
@@ -32,23 +33,18 @@ export function DashboardTopBar({ onMenuClick, showBrandInNavbar, }: {
 
       {showBrandInNavbar ? (<BrandLogoLink href="/dashboard" size="nav" className="min-w-0 max-w-[min(100%,200px)] shrink-0 [&_.brand-logo-mark]:text-base sm:[&_.brand-logo-mark]:text-lg lg:[&_.brand-logo-mark]:text-lg"/>) : null}
 
-      <div className="relative min-h-9 min-w-0 flex-1 max-w-md">
-        <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden/>
-        <Input type="search" placeholder="Search…" className="h-9 w-full min-w-0 rounded-lg border-border/80 bg-muted/40 pl-9 text-sm" aria-label="Search"/>
-      </div>
+      <DashboardSearch />
 
-      <Button type="button" variant="ghost" size="icon" className="hidden size-10 shrink-0 touch-manipulation sm:inline-flex" aria-label="Notifications">
-        <Bell className="size-5 text-muted-foreground"/>
-      </Button>
+      <DashboardNotifications />
 
-      <Button asChild size="icon" variant="ghost" className="shrink-0 touch-manipulation sm:hidden" title="New booking">
-        <Link href="/calendar" aria-label="New booking">
+      <Button asChild size="icon" variant="ghost" className="shrink-0 touch-manipulation sm:hidden" title="Calendar">
+        <Link href="/calendar" aria-label="Calendar">
           <CalendarPlus className="size-5 text-muted-foreground"/>
         </Link>
       </Button>
 
-      <Button asChild size="sm" className="hidden shrink-0 rounded-lg sm:inline-flex">
-        <Link href="/calendar">New booking</Link>
+      <Button asChild size="sm" variant="outline" className="hidden shrink-0 rounded-lg sm:inline-flex">
+        <Link href="/calendar">Calendar</Link>
       </Button>
 
       <DropdownMenu>

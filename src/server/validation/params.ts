@@ -1,7 +1,10 @@
 import { z } from "zod";
 
 export const coachIdParamSchema = z.object({
-  id: z.string().trim().min(1, "Coach id is required"),
+  id: z
+    .string({ error: "coach id must be a string" })
+    .trim()
+    .min(1, "coach id is required"),
 });
 
 export async function parseRouteParams<T extends z.ZodType>(

@@ -2,13 +2,25 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, Award, CalendarClock, Clock, MapPin, MessageCircle, Sparkles, Star, TrendingUp, Users, } from "lucide-react";
+import {
+  ArrowLeft,
+  Award,
+  CalendarClock,
+  Clock,
+  MapPin,
+  MessageCircle,
+  Package,
+  Sparkles,
+  Star,
+  Users,
+} from "lucide-react";
 import type { MockTrainer } from "@/lib/mock-trainers";
 import { trainerWeekdayRows } from "@/lib/mock-trainers";
 import { trainerAvatarUrls } from "@/lib/media-urls";
 import { TrainerBookingFlow } from "@/components/site/trainer-booking-flow";
 import { TrainerProfileBookingCta } from "@/components/site/trainer-profile-booking-cta";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 type CoachProfileViewProps = {
@@ -106,7 +118,7 @@ export function CoachProfileView({ trainer }: CoachProfileViewProps) {
                 </div>
                 <div className="flex items-center gap-2">
                   <CalendarClock className="size-4 shrink-0 text-primary" aria-hidden/>
-                  <span>AI-ready calendar sync (demo)</span>
+                  <span>Live booking & availability</span>
                 </div>
               </div>
             </motion.div>
@@ -144,7 +156,14 @@ export function CoachProfileView({ trainer }: CoachProfileViewProps) {
           </div>
           <motion.div className="grid min-w-0 gap-4 md:grid-cols-2">
             {trainer.reviews.length === 0 ? (
-              <p className="text-sm text-muted-foreground md:col-span-2">No reviews yet.</p>
+              <div className="md:col-span-2">
+                <EmptyState
+                  compact
+                  icon={MessageCircle}
+                  title="No reviews yet"
+                  description="Be the first to book and share feedback after your session is completed."
+                />
+              </div>
             ) : null}
             {trainer.reviews.map((r, i) => (<motion.div key={r.id} initial={{ opacity: 0, y: 8 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.06 * i, duration: 0.35 }}>
                 <Card className="h-full border-border/80 shadow-sm transition-shadow hover:shadow-md">
@@ -170,14 +189,23 @@ export function CoachProfileView({ trainer }: CoachProfileViewProps) {
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
               <h2 className="text-lg font-semibold tracking-tight sm:text-xl">Services & pricing</h2>
-              <p className="mt-1 text-sm text-muted-foreground">Transparent packages — swap for your real SKUs later.</p>
+              <p className="mt-1 text-sm text-muted-foreground">Transparent packages. Set your own services and pricing.</p>
             </div>
           </div>
           <div className="grid min-w-0 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {trainer.services.length === 0 ? (
-              <p className="text-sm text-muted-foreground sm:col-span-2 lg:col-span-3">
-                No services listed yet.
-              </p>
+              <div className="sm:col-span-2 lg:col-span-3">
+                <EmptyState
+                  compact
+                  icon={Package}
+                  title="No services listed yet"
+                  description="This coach is still setting up bookable packages. Check back soon or browse other coaches."
+                >
+                  <Button asChild variant="secondary" size="sm" className="min-h-9">
+                    <Link href="/coaches">Browse coaches</Link>
+                  </Button>
+                </EmptyState>
+              </div>
             ) : null}
             {trainer.services.map((s, i) => (<motion.div key={s.id} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.05 * i, duration: 0.35 }}>
                 <Card className="h-full border-border/80 shadow-sm transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-md">
@@ -194,52 +222,13 @@ export function CoachProfileView({ trainer }: CoachProfileViewProps) {
           </div>
         </motion.section>
 
-        {trainer.transformation ? (<motion.section className="overflow-hidden rounded-2xl border border-border bg-muted/20 shadow-sm" initial="hidden" whileInView="show" viewport={{ once: true, margin: "-50px" }} variants={fade} custom={4}>
-            <div className="border-b border-border/60 bg-card/60 px-5 py-4 sm:px-6">
-              <div className="flex items-center gap-2">
-                <TrendingUp className="size-5 text-primary" aria-hidden/>
-                <h2 className="text-lg font-semibold tracking-tight sm:text-xl">{trainer.transformation.headline}</h2>
-              </div>
-              <p className="mt-1 text-sm text-muted-foreground">Demo transformation — placeholders for before/after media.</p>
-            </div>
-            <div className="grid gap-6 p-5 sm:grid-cols-2 sm:p-6 lg:grid-cols-[1fr_1fr_280px]">
-              <div className="space-y-2">
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Before</p>
-                <div className="flex aspect-[4/3] items-end justify-center rounded-xl border border-dashed border-border bg-muted/50 pb-3 text-center text-xs text-muted-foreground">
-                  {trainer.transformation.beforeLabel}
-                </div>
-              </div>
-              <div className="space-y-2">
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">After</p>
-                <div className="flex aspect-[4/3] items-end justify-center rounded-xl border border-dashed border-border bg-primary/[0.06] pb-3 text-center text-xs text-muted-foreground">
-                  {trainer.transformation.afterLabel}
-                </div>
-              </div>
-              <div className="flex flex-col justify-between rounded-xl border border-border bg-card p-4 shadow-sm">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Progress metrics</p>
-                  <ul className="mt-3 space-y-2">
-                    {trainer.transformation.metrics.map((m) => (<li key={m.label} className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">{m.label}</span>
-                        <span className="font-semibold tabular-nums text-foreground">{m.value}</span>
-                      </li>))}
-                  </ul>
-                </div>
-                <div className="mt-4 border-t border-border/60 pt-4">
-                  <p className="text-sm font-medium text-foreground">&ldquo;{trainer.transformation.testimonial}&rdquo;</p>
-                  <p className="mt-2 text-xs text-muted-foreground">— {trainer.transformation.testimonialAuthor}</p>
-                </div>
-              </div>
-            </div>
-          </motion.section>) : null}
-
-        <motion.section className="rounded-2xl border border-border bg-muted/15 p-4 sm:p-6" initial="hidden" whileInView="show" viewport={{ once: true, margin: "-40px" }} variants={fade} custom={5}>
+        <motion.section className="rounded-2xl border border-border bg-muted/15 p-4 sm:p-6" initial="hidden" whileInView="show" viewport={{ once: true, margin: "-40px" }} variants={fade} custom={4}>
           <h2 className="flex items-center gap-2 text-lg font-semibold tracking-tight">
             <CalendarClock className="size-5 text-primary" aria-hidden/>
             Availability preview
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Sample week — FitBook AI will read live availability after you connect a calendar backend.
+            Weekly template from this coach&apos;s saved availability.
           </p>
           <div className="mt-4 overflow-x-auto rounded-xl border border-border/80 bg-card">
             <table className="w-full min-w-[280px] text-left text-sm">
@@ -267,7 +256,7 @@ export function CoachProfileView({ trainer }: CoachProfileViewProps) {
                 Book with FitBook
               </div>
               <h2 className="mt-1 text-xl font-semibold tracking-tight">Reserve a session</h2>
-              <p className="mt-1 text-sm text-muted-foreground">Pick a service and slot — demo flow below.</p>
+              <p className="mt-1 text-sm text-muted-foreground">Pick a service and open slot to book.</p>
             </div>
           </div>
           <TrainerBookingFlow trainerId={trainer.id} trainerName={trainer.name}/>

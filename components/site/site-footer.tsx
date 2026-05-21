@@ -65,7 +65,7 @@ export function SiteFooter() {
           </nav>
         </div>
         <div className="mt-6 border-t border-border/60 pt-6 text-center text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} FitBook AI</p>
+          <p suppressHydrationWarning>© {new Date().getFullYear()} FitBook AI</p>
         </div>
       </div>
     </footer>);

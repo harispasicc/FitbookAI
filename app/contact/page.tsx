@@ -6,19 +6,18 @@ import { SiteFooter } from "@/components/site/site-footer";
 import { fitnessImages } from "@/lib/media-urls";
 export const metadata: Metadata = {
     title: "Contact",
-    description: "Visit or write to FitBook AI — Sarajevo studio (sample details).",
+    description: "Visit or write to FitBook AI. Sarajevo studio contact details.",
 };
 const SARAJEVO_MAP_EMBED = "https://www.openstreetmap.org/export/embed.html?bbox=18.365%2C43.828%2C18.462%2C43.885&layer=mapnik&marker=43.8563%2C18.4131";
 export default function ContactPage() {
     return (<>
       <SitePageShell title="Contact" maxWidth="wide" heroImage={{
             src: fitnessImages.cityAerial,
-            alt: "City skyline at dusk — placeholder for Sarajevo office region",
+            alt: "City skyline at dusk, Sarajevo region",
         }}>
         <p>
-          Reach the studio team for partnerships, product questions, or studio onboarding. Details below are{" "}
-          <span className="font-medium text-foreground">sample placeholder data</span> for a portfolio build — swap in
-          your real channels when you ship.
+          Reach the studio team for partnerships, product questions, or studio onboarding. Update these contact
+          details in your deployment when you go live.
         </p>
 
         <div className="grid min-w-0 gap-8 lg:grid-cols-2 lg:items-start">
@@ -72,9 +71,9 @@ export default function ContactPage() {
 
           <div className="min-w-0 space-y-3">
             <h2 className="text-base font-semibold text-foreground">Location</h2>
-            <p className="text-sm text-muted-foreground">Map centred on Sarajevo — illustrative pin only.</p>
+            <p className="text-sm text-muted-foreground">Map centred on Sarajevo. Illustrative pin only.</p>
             <div className="overflow-hidden rounded-2xl border border-border/80 bg-muted shadow-sm">
-              <iframe title="Map of Sarajevo — FitBook studio (sample)" src={SARAJEVO_MAP_EMBED} className="aspect-[4/3] w-full min-h-[240px] border-0 lg:min-h-[320px]" loading="lazy" referrerPolicy="no-referrer-when-downgrade"/>
+              <iframe title="Map of Sarajevo, FitBook studio" src={SARAJEVO_MAP_EMBED} className="aspect-[4/3] w-full min-h-[240px] border-0 lg:min-h-[320px]" loading="lazy" referrerPolicy="no-referrer-when-downgrade"/>
             </div>
             <p className="text-center text-xs text-muted-foreground">
               <a href="https://www.openstreetmap.org/?mlat=43.8563&mlon=18.4131#map=14/43.8563/18.4131" target="_blank" rel="noopener noreferrer" className="font-medium text-primary underline-offset-4 hover:underline">

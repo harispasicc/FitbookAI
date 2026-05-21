@@ -1,15 +1,26 @@
 "use client";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import type { LucideIcon } from "lucide-react";
-import { Bell, CalendarDays, ChevronLeft, ChevronRight, Home, LayoutList, LogOut, Sparkles, TrendingUp, User, Users } from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight, Home, LayoutList, LogOut, Sparkles, TrendingUp, User, Users } from "lucide-react";
 import { useEffect, useState } from "react";
+
+const ClientNotifications = dynamic(
+  () =>
+    import("@/components/client/client-notifications").then(
+      (mod) => mod.ClientNotifications,
+    ),
+  { ssr: false },
+);
 import { BrandLogoLink } from "@/components/site/brand-logo-link";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, } from "@/components/ui/dropdown-menu";
 import { useIsBreakpointLg } from "@/hooks/use-is-breakpoint-lg";
+import { BookingsProvider } from "@/contexts/bookings-data-context";
 import { useAuth } from "@/contexts/auth-context";
+import { deferEffect } from "@/lib/defer-effect";
 import { cn } from "@/lib/utils";
 type NavItem = {
     href: string;
@@ -49,7 +60,7 @@ export function ClientShell({ children }: {
     const showSidebarBrand = !compact;
     const showNavbarBrand = !mobileOpen && (!isLg || collapsed);
     useEffect(() => {
-        setMobileOpen(false);
+        deferEffect(() => setMobileOpen(false));
     }, [pathname]);
     function handleLogout() {
         void logout().then(() => {
@@ -110,9 +121,7 @@ export function ClientShell({ children }: {
                   Train · book · track
                 </span>}/>) : null}
           <div className="min-h-9 min-w-0 flex-1" aria-hidden/>
-          <Button type="button" variant="ghost" size="icon" className="size-10 shrink-0 touch-manipulation" aria-label="Notifications">
-            <Bell className="size-5 text-muted-foreground"/>
-          </Button>
+          <ClientNotifications />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button type="button" variant="ghost" size="icon" className="size-10 shrink-0 touch-manipulation rounded-full" aria-label="Account menu">
@@ -147,7 +156,9 @@ export function ClientShell({ children }: {
           </DropdownMenu>
         </header>
         <main className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
-          <div className="mx-auto w-full min-w-0 max-w-6xl px-3 py-6 min-[400px]:px-4 sm:px-6 sm:py-8 lg:px-8">{children}</div>
+          <div className="mx-auto w-full min-w-0 max-w-6xl px-3 py-6 min-[400px]:px-4 sm:px-6 sm:py-8 lg:px-8">
+            <BookingsProvider>{children}</BookingsProvider>
+          </div>
         </main>
       </div>
     </div>);

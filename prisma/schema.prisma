@@ -11,17 +11,77 @@ enum UserRole {
   TRAINER
 }
 
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum ClientGoalKey {
+  LOSE
+  MUSCLE
+  CONDITIONING
+  REHAB
+}
+
+enum NotificationTone {
+  INFO
+  SUCCESS
+  WARNING
+  NEUTRAL
+}
+
+enum TrainerPlan {
+  FREE
+  PRO
+  AI_PRO
+}
+
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
   password  String?
   role      UserRole @default(CLIENT)
 
-  clientProfile  ClientProfile?
-  trainerProfile TrainerProfile?
+  clientProfile         ClientProfile?
+  trainerProfile        TrainerProfile?
+  clientBookings            Booking[]                 @relation("ClientBookings")
+  trainerReviews            TrainerReview[]           @relation("ClientReviews")
+  passwordResetTokens       PasswordResetToken[]
+  aiUsage                   AiUsage[]
+  trainerNotificationReads  TrainerNotificationRead[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model AiUsage {
+  id     String   @id @default(cuid())
+  userId String
+  date   DateTime
+  count  Int      @default(0)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, date])
+  @@index([userId])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
 }
 
 model ClientProfile {
@@ -29,21 +89,85 @@ model ClientProfile {
   userId String @unique
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  fullName String?
+  fullName                 String?
+  headline                 String?
+  phone                    String?
+  city                     String?
+  timezone                 String? @default("Europe/Sarajevo")
+  bio                      String?
+  selectedTrainerProfileId String?
+  selectedTrainerProfile   TrainerProfile? @relation("ClientSelectedCoach", fields: [selectedTrainerProfileId], references: [id], onDelete: SetNull)
+
+  goals         ClientGoals?
+  workouts      ClientWorkout[]
+  notifications ClientNotification[]
 }
 
 model TrainerProfile {
   id        String  @id @default(cuid())
   userId    String  @unique
   user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  fullName  String?
-  bio       String?
-  specialty String?
+  fullName         String?
+  bio              String?
+  specialty        String?
+  yearsExperience  Int      @default(0)
+  plan             TrainerPlan @default(FREE)
 
   services              TrainerService[]
   reviews               TrainerReview[]
   weeklyAvailability    TrainerWeeklyAvailability[]
   availabilitySlots     TrainerAvailabilitySlot[]
+  bookings              Booking[]
+  linkedClients         ClientProfile[] @relation("ClientSelectedCoach")
+  clientNotes           TrainerClientNote[]
+  notificationPrefs     Json?
+}
+
+model ClientGoals {
+  id              String        @id @default(cuid())
+  clientProfileId String        @unique
+  clientProfile   ClientProfile @relation(fields: [clientProfileId], references: [id], onDelete: Cascade)
+
+  activeGoal      ClientGoalKey @default(CONDITIONING)
+  pctLose         Int           @default(34)
+  pctMuscle       Int           @default(52)
+  pctConditioning Int           @default(68)
+  pctRehab        Int           @default(41)
+  /** Optional per-goal notes: { "lose"?: string, "muscle"?: string, ... } */
+  customNotes     Json?
+
+  updatedAt DateTime @updatedAt
+}
+
+model ClientWorkout {
+  id              String        @id @default(cuid())
+  clientProfileId String
+  clientProfile   ClientProfile @relation(fields: [clientProfileId], references: [id], onDelete: Cascade)
+
+  workoutDate DateTime
+  type        String
+  durationMin Int
+  calories    Int
+  trainerNote String?
+
+  createdAt DateTime @default(now())
+
+  @@index([clientProfileId, workoutDate])
+}
+
+model ClientNotification {
+  id              String        @id @default(cuid())
+  clientProfileId String
+  clientProfile   ClientProfile @relation(fields: [clientProfileId], references: [id], onDelete: Cascade)
+
+  title String
+  body  String
+  tone  NotificationTone @default(INFO)
+  readAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([clientProfileId, createdAt])
 }
 
 model TrainerService {
@@ -61,13 +185,45 @@ model TrainerService {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  bookings          Booking[]
+  availabilitySlots TrainerAvailabilitySlot[]
+
   @@index([trainerProfileId, isActive, sortOrder])
+}
+
+model TrainerClientNote {
+  id               String         @id @default(cuid())
+  trainerProfileId String
+  trainerProfile   TrainerProfile @relation(fields: [trainerProfileId], references: [id], onDelete: Cascade)
+  clientUserId     String
+  notes            String         @default("")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([trainerProfileId, clientUserId])
+  @@index([trainerProfileId])
+}
+
+model TrainerNotificationRead {
+  id             String   @id @default(cuid())
+  trainerUserId  String
+  trainerUser    User     @relation(fields: [trainerUserId], references: [id], onDelete: Cascade)
+  notificationId String
+  readAt         DateTime @default(now())
+
+  @@unique([trainerUserId, notificationId])
+  @@index([trainerUserId])
 }
 
 model TrainerReview {
   id               String         @id @default(cuid())
   trainerProfileId String
   trainerProfile   TrainerProfile @relation(fields: [trainerProfileId], references: [id], onDelete: Cascade)
+  clientUserId     String?
+  clientUser       User?          @relation("ClientReviews", fields: [clientUserId], references: [id], onDelete: SetNull)
+  bookingId        String?        @unique
+  booking          Booking?       @relation(fields: [bookingId], references: [id], onDelete: SetNull)
 
   authorName String
   rating     Int
@@ -76,6 +232,7 @@ model TrainerReview {
   createdAt DateTime @default(now())
 
   @@index([trainerProfileId, createdAt])
+  @@index([clientUserId])
 }
 
 model TrainerWeeklyAvailability {
@@ -94,10 +251,42 @@ model TrainerAvailabilitySlot {
   id               String         @id @default(cuid())
   trainerProfileId String
   trainerProfile   TrainerProfile @relation(fields: [trainerProfileId], references: [id], onDelete: Cascade)
+  serviceId        String?
+  service          TrainerService? @relation(fields: [serviceId], references: [id], onDelete: Cascade)
 
   startsAt DateTime
   endsAt   DateTime
   isBooked Boolean  @default(false)
 
+  booking Booking?
+
   @@index([trainerProfileId, startsAt])
+  @@index([serviceId, startsAt])
+}
+
+model Booking {
+  id                 String        @id @default(cuid())
+  clientUserId       String
+  clientUser         User          @relation("ClientBookings", fields: [clientUserId], references: [id], onDelete: Cascade)
+  trainerProfileId   String
+  trainerProfile     TrainerProfile @relation(fields: [trainerProfileId], references: [id], onDelete: Cascade)
+  serviceId          String
+  service            TrainerService @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  availabilitySlotId String?       @unique
+  availabilitySlot   TrainerAvailabilitySlot? @relation(fields: [availabilitySlotId], references: [id], onDelete: SetNull)
+
+  status     BookingStatus @default(PENDING)
+  startsAt   DateTime
+  endsAt     DateTime
+  priceCents Int
+  notes      String?
+
+  review TrainerReview?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([clientUserId, startsAt])
+  @@index([trainerProfileId, startsAt])
+  @@index([status])
 }

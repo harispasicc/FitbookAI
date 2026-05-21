@@ -7,7 +7,7 @@ import { loadCoaches } from "@/lib/load-coaches";
 export const metadata: Metadata = {
   title: "Find coaches",
   description:
-    "Browse FitBook AI coaches — filter by specialty, format, and rating. Book sessions after sign-in.",
+    "Browse FitBook AI coaches. Filter by specialty, format, and rating. Book sessions after sign-in.",
 };
 
 export default async function CoachesPage() {

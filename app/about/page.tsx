@@ -11,7 +11,7 @@ export default function AboutPage() {
       <SitePageShell title="About us" heroImage={{ src: fitnessImages.heroCoach, alt: "Coach working with a client in a studio" }}>
         <p>
           FitBook AI is a focused workspace for coaches and boutique studios: bookings on a calendar,
-          client notes, lightweight analytics, and an AI assistant for routine messaging — without turning the
+          client notes, lightweight analytics, and an AI assistant for routine messaging, without turning the
           product into a generic admin panel.
         </p>
         <p>

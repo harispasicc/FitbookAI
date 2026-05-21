@@ -11,11 +11,27 @@ import {
   toAuthUserDto,
   type AppRole,
 } from "@/server/modules/auth/auth.dto";
-import type { registerBodySchema, loginBodySchema } from "@/server/modules/auth/auth.schemas";
+import {
+  createPasswordResetToken,
+  hashPasswordResetToken,
+  PASSWORD_RESET_TTL_MS,
+} from "@/server/auth/password-reset";
+import { sendPasswordResetEmail } from "@/server/email/send-password-reset";
+import type {
+  forgotPasswordBodySchema,
+  loginBodySchema,
+  registerBodySchema,
+  resetPasswordBodySchema,
+} from "@/server/modules/auth/auth.schemas";
 import type { z } from "zod";
 
 export type RegisterInput = z.infer<typeof registerBodySchema>;
 export type LoginInput = z.infer<typeof loginBodySchema>;
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordBodySchema>;
+export type ResetPasswordInput = z.infer<typeof resetPasswordBodySchema>;
+
+const FORGOT_PASSWORD_MESSAGE =
+  "If an account exists for this email, you will receive password reset instructions shortly.";
 
 async function createSessionForUser(user: {
   id: string;
@@ -107,5 +123,57 @@ export const authService = {
       return null;
     }
     return toAuthUserDto(user);
+  },
+
+  async forgotPassword(input: ForgotPasswordInput) {
+    const email = input.email.trim().toLowerCase();
+    const user = await authRepository.findByEmail(email);
+
+    let devResetUrl: string | undefined;
+
+    if (user?.password) {
+      await authRepository.invalidatePasswordResetTokens(user.id);
+
+      const { token, tokenHash } = createPasswordResetToken();
+      const expiresAt = new Date(Date.now() + PASSWORD_RESET_TTL_MS);
+
+      await authRepository.createPasswordResetToken({
+        userId: user.id,
+        tokenHash,
+        expiresAt,
+      });
+
+      const sent = await sendPasswordResetEmail({ email: user.email, token });
+      if (process.env.NODE_ENV === "development") {
+        devResetUrl = sent.resetUrl;
+      }
+    }
+
+    return {
+      message: FORGOT_PASSWORD_MESSAGE,
+      ...(devResetUrl ? { devResetUrl } : {}),
+    };
+  },
+
+  async resetPassword(input: ResetPasswordInput) {
+    const tokenHash = hashPasswordResetToken(input.token.trim());
+    const record = await authRepository.findActivePasswordResetToken(tokenHash);
+
+    if (!record?.user.password) {
+      throw new ApiError(
+        400,
+        "This reset link is invalid or has expired. Request a new one.",
+        "INVALID_RESET_TOKEN",
+      );
+    }
+
+    const passwordHash = await hashPassword(input.password);
+    await authRepository.updatePassword(record.userId, passwordHash);
+    await authRepository.markPasswordResetTokenUsed(record.id);
+    await authRepository.invalidatePasswordResetTokens(record.userId);
+
+    return {
+      message: "Your password has been updated. You can sign in now.",
+    };
   },
 };

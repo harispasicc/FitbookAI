@@ -3,25 +3,57 @@ import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowRight, Bell, CalendarPlus, Flame, MessageSquare, Sparkles, Target, TrendingUp, } from "lucide-react";
+import {
+  ArrowRight,
+  Bell,
+  CalendarClock,
+  CalendarPlus,
+  Flame,
+  Sparkles,
+  Target,
+  UserRound,
+} from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
 import { useAuth } from "@/contexts/auth-context";
-import { useDemoData } from "@/hooks/use-demo-data";
-import { getTrainerById } from "@/lib/mock-trainers";
-import { mockBookings } from "@/lib/mock-bookings";
+import { useBookings } from "@/hooks/use-bookings";
+import {
+  apiGetClientCoach,
+  apiGetClientGoals,
+  apiGetClientNotifications,
+  apiMarkNotificationRead,
+  goalsDtoToState,
+  type ClientCoachDto,
+} from "@/lib/client-portal-api";
 import { trainerAvatarUrls } from "@/lib/media-urls";
-import { CLIENT_GOALS_STORAGE_KEY, CLIENT_GOALS_UPDATE_EVENT, defaultClientGoals, goalLabels, readClientGoals, type ClientGoalsState, } from "@/lib/client-goals-storage";
-import { DEFAULT_CLIENT_NOTIFICATIONS } from "@/lib/client-mocks";
-import { ClientAiAssistantPanel } from "@/components/client/client-ai-assistant-panel";
+import {
+  CLIENT_PORTAL_UPDATE_EVENT,
+  notifyClientPortalUpdated,
+} from "@/lib/demo-data-events";
+import {
+  defaultClientGoals,
+  goalLabels,
+  type ClientGoalsState,
+} from "@/lib/client-goals-storage";
+import type { ClientNotification } from "@/lib/client-mocks";
+import { ClientAiAssistantPanelLazy } from "@/components/client/client-ai-assistant-panel-lazy";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
-function toneRing(tone: (typeof DEFAULT_CLIENT_NOTIFICATIONS)[number]["tone"]) {
+function avatarIndexFromId(id: string): number {
+    let hash = 0;
+    for (let i = 0; i < id.length; i++) {
+        hash = (hash + id.charCodeAt(i)) % trainerAvatarUrls.length;
+    }
+    return hash;
+}
+
+function toneRing(tone: ClientNotification["tone"]) {
     switch (tone) {
         case "success":
             return "border-emerald-500/25 bg-emerald-500/[0.06]";
         case "warning":
-            return "border-amber-500/30 bg-amber-500/[0.07]";
+            return "border-amber-700/30 bg-amber-50 dark:border-amber-500/40 dark:bg-amber-950/90";
         case "info":
             return "border-sky-500/25 bg-sky-500/[0.05]";
         default:
@@ -30,43 +62,57 @@ function toneRing(tone: (typeof DEFAULT_CLIENT_NOTIFICATIONS)[number]["tone"]) {
 }
 export function ClientHomeView() {
     const { user } = useAuth();
-    const { data } = useDemoData();
+    const { rows: myBookings } = useBookings();
     const [goals, setGoals] = useState<ClientGoalsState>(defaultClientGoals);
-    const trainer = user?.selectedTrainerId ? getTrainerById(user.selectedTrainerId) : undefined;
-    const avatarSrc = trainer != null
-        ? (trainerAvatarUrls[trainer.avatarIndex % trainerAvatarUrls.length] ?? trainerAvatarUrls[0])
+    const [coach, setCoach] = useState<ClientCoachDto | null>(null);
+    const [notifications, setNotifications] = useState<ClientNotification[]>([]);
+
+    const avatarSrc = coach
+        ? (trainerAvatarUrls[avatarIndexFromId(coach.id) % trainerAvatarUrls.length] ??
+          trainerAvatarUrls[0])
         : null;
+
     useEffect(() => {
-        setGoals(readClientGoals());
-        function onStorage(e: StorageEvent) {
-            if (e.key === CLIENT_GOALS_STORAGE_KEY)
-                setGoals(readClientGoals());
+        if (!user || user.role !== "client")
+            return;
+
+        let cancelled = false;
+
+        async function load() {
+            try {
+                const [goalsDto, coachDto, notifs] = await Promise.all([
+                    apiGetClientGoals(),
+                    apiGetClientCoach(),
+                    apiGetClientNotifications(),
+                ]);
+                if (cancelled)
+                    return;
+                setGoals(goalsDtoToState(goalsDto));
+                setCoach(coachDto);
+                setNotifications(notifs);
+            }
+            catch {
+            }
         }
-        function onLocal() {
-            setGoals(readClientGoals());
+
+        void load();
+
+        function onPortalUpdate() {
+            void load();
         }
-        window.addEventListener("storage", onStorage);
-        window.addEventListener(CLIENT_GOALS_UPDATE_EVENT, onLocal);
+        window.addEventListener(CLIENT_PORTAL_UPDATE_EVENT, onPortalUpdate);
         return () => {
-            window.removeEventListener("storage", onStorage);
-            window.removeEventListener(CLIENT_GOALS_UPDATE_EVENT, onLocal);
+            cancelled = true;
+            window.removeEventListener(CLIENT_PORTAL_UPDATE_EVENT, onPortalUpdate);
         };
-    }, []);
-    const allBookings = data?.bookings?.length ? data.bookings : mockBookings;
-    const myBookings = useMemo(() => {
-        if (!user)
-            return [];
-        return allBookings.filter((b) => (b.clientEmail && b.clientEmail === user.email) ||
-            (!b.clientEmail && b.guest === user.name));
-    }, [allBookings, user]);
+    }, [user, user?.selectedTrainerId]);
+    const [upcomingCutoffMs] = useState(() => Date.now() - 36e5);
     const upcoming = useMemo(() => {
-        const now = Date.now();
-        const pool = myBookings.length > 0 ? myBookings : allBookings;
-        return [...pool]
-            .filter((b) => b.status !== "cancelled" && b.slotIso && new Date(b.slotIso).getTime() >= now - 36e5)
+        return [...myBookings]
+            .filter((b) => b.status !== "cancelled" && b.slotIso && new Date(b.slotIso).getTime() >= upcomingCutoffMs)
             .sort((a, b) => (a.slotIso ?? "").localeCompare(b.slotIso ?? ""))
             .slice(0, 3);
-    }, [allBookings, myBookings]);
+    }, [myBookings, upcomingCutoffMs]);
     const firstName = user?.name?.split(/\s+/)[0] ?? "there";
     const activeGoalLabel = goalLabels[goals.active];
     const activeGoalPct = goals.pct[goals.active];
@@ -74,7 +120,7 @@ export function ClientHomeView() {
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="min-w-0 space-y-2">
         <h1 className="text-balance text-2xl font-semibold tracking-tight sm:text-3xl">Welcome back, {firstName}</h1>
         <p className="text-pretty text-sm text-muted-foreground sm:text-base">
-          Your coaching hub — sessions, goals, and coach updates in one calm surface.
+          Sessions, goals, and coach updates in one place. Stay on track between training days.
         </p>
       </motion.div>
 
@@ -82,8 +128,18 @@ export function ClientHomeView() {
         {[
             { label: "Active goal", value: activeGoalLabel, sub: `${activeGoalPct}% complete`, icon: Target },
             { label: "Upcoming sessions", value: String(upcoming.length), sub: "Next 7 days window", icon: CalendarPlus },
-            { label: "Weekly streak", value: "4", sub: "Training weeks in a row", icon: Flame },
-            { label: "Load trend", value: "+6%", sub: "Volume vs last month", icon: TrendingUp },
+            {
+              label: "Completed sessions",
+              value: String(myBookings.filter((b) => b.status === "completed").length),
+              sub: "All time",
+              icon: Flame,
+            },
+            {
+              label: "Linked coach",
+              value: coach?.fullName ?? "None yet",
+              sub: coach?.specialty ?? "Find a coach to get started",
+              icon: UserRound,
+            },
         ].map((s, i) => (<motion.div key={s.label} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 * i }} whileHover={{ y: -2 }}>
             <Card className="h-full rounded-2xl border border-border/80 bg-card shadow-sm">
               <CardContent className="flex items-start gap-3 p-4 sm:p-5">
@@ -100,11 +156,11 @@ export function ClientHomeView() {
           </motion.div>))}
       </div>
 
-      <ClientAiAssistantPanel />
+      <ClientAiAssistantPanelLazy />
 
       <div className="grid min-w-0 gap-6 lg:grid-cols-3 lg:gap-8">
         <div className="min-w-0 space-y-6 lg:col-span-2">
-          {trainer && avatarSrc ? (<Card className="overflow-hidden rounded-2xl border border-border/80 shadow-sm">
+          {coach && avatarSrc ? (<Card className="overflow-hidden rounded-2xl border border-border/80 shadow-sm">
               <CardHeader className="pb-3">
                 <CardTitle className="text-base">My coach</CardTitle>
                 <CardDescription>Your assigned coach and next touchpoints.</CardDescription>
@@ -114,25 +170,17 @@ export function ClientHomeView() {
                   <Image src={avatarSrc} alt="" width={96} height={96} className="size-24 shrink-0 rounded-2xl border border-border object-cover" sizes="96px"/>
                   <div className="min-w-0 flex-1 space-y-2">
                     <div>
-                      <p className="text-lg font-semibold text-foreground">{trainer.name}</p>
-                      <p className="text-sm text-muted-foreground">{trainer.headline}</p>
-                      <p className="mt-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">Specialty</p>
-                      <p className="text-sm text-foreground">{trainer.specializations[0] ?? "Hybrid coaching"}</p>
+                      <p className="text-lg font-semibold text-foreground">{coach.fullName ?? "Coach"}</p>
+                      <p className="text-sm text-muted-foreground">{coach.specialty ?? "Coaching"}</p>
+                      {coach.bio ? (<p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{coach.bio}</p>) : null}
                     </div>
-                    <div className="flex flex-wrap gap-2">
-                      <Button size="sm" variant="outline" className="gap-2 rounded-xl" type="button" asChild>
-                        <Link href={`/coaches/${trainer.id}`}>
-                          <MessageSquare className="size-4" aria-hidden/>
-                          Quick message
-                        </Link>
-                      </Button>
-                      <Button size="sm" className="gap-2 rounded-xl" asChild>
-                        <Link href={`/coaches/${trainer.id}`}>
-                          View profile
-                          <ArrowRight className="size-4" aria-hidden/>
-                        </Link>
-                      </Button>
-                    </div>
+                    <Button size="sm" className="gap-2 rounded-xl" asChild>
+                      <Link href={`/coaches/${coach.id}`}>
+                        <CalendarPlus className="size-4" aria-hidden />
+                        Book a session
+                        <ArrowRight className="size-4" aria-hidden />
+                      </Link>
+                    </Button>
                   </div>
                 </div>
                 <Separator />
@@ -148,7 +196,7 @@ export function ClientHomeView() {
                     hour: "numeric",
                     minute: "2-digit",
                 })
-                : trainer.nextOpenSlots[0] ?? "Book a slot from your coach’s profile"}
+                : "Book a slot from your coach’s profile"}
                     </p>
                     <p className="mt-0.5 text-xs text-muted-foreground">{upcoming[0]?.service ?? "Pick a service to lock time"}</p>
                   </div>
@@ -160,9 +208,14 @@ export function ClientHomeView() {
                     </div>
                   </div>
                   <div className="rounded-xl border border-primary/20 bg-primary/[0.04] p-3 sm:col-span-2">
-                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Membership</p>
-                    <p className="mt-1 text-sm font-medium text-foreground">Pro Coaching · 8 sessions / month</p>
-                    <p className="text-xs text-muted-foreground">Renews Jun 1 · demo billing placeholder</p>
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Your plan</p>
+                    <p className="mt-1 text-sm font-medium text-foreground">
+                      {coach.activeServicesCount} active service
+                      {coach.activeServicesCount === 1 ? "" : "s"} with {coach.fullName ?? "your coach"}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Book and pay per session. No subscription billing in this app yet.
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -170,7 +223,7 @@ export function ClientHomeView() {
               <CardContent className="space-y-3 p-6 text-center sm:p-8">
                 <p className="text-sm font-medium text-foreground">Connect with a coach</p>
                 <p className="text-sm text-muted-foreground">
-                  Link a coach from the directory — sign up from their profile to attach them here (demo).
+                  Select a coach from the directory to link them here.
                 </p>
                 <Button asChild>
                   <Link href="/coaches">Find coaches</Link>
@@ -197,10 +250,26 @@ export function ClientHomeView() {
             <Card className="rounded-2xl border border-border/80 shadow-sm">
               <CardHeader className="pb-2">
                 <CardTitle className="text-base">Upcoming sessions</CardTitle>
-                <CardDescription>From your booking history (demo).</CardDescription>
+                <CardDescription>Your upcoming FitBook sessions.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-2">
-                {upcoming.length === 0 ? (<p className="text-sm text-muted-foreground">No upcoming slots — book from a coach profile.</p>) : (upcoming.map((b) => (<div key={b.id} className="flex items-center justify-between gap-2 rounded-xl border border-border/60 bg-muted/15 px-3 py-2 text-sm">
+                {upcoming.length === 0 ? (
+                  <EmptyState
+                    compact
+                    icon={CalendarClock}
+                    title="No upcoming sessions"
+                    description="Book a session from a coach profile to see it here."
+                  >
+                    <Button asChild variant="secondary" size="sm" className="min-h-9">
+                      <Link href="/coaches">Find coaches</Link>
+                    </Button>
+                  </EmptyState>
+                ) : (
+                  upcoming.map((b) => (
+                    <div
+                      key={b.id}
+                      className="flex items-center justify-between gap-2 rounded-xl border border-border/60 bg-muted/15 px-3 py-2 text-sm"
+                    >
                       <span className="min-w-0 truncate font-medium text-foreground">{b.service}</span>
                       <span className="shrink-0 text-xs text-muted-foreground">
                         {b.slotIso
@@ -212,7 +281,9 @@ export function ClientHomeView() {
                 })
                 : b.date}
                       </span>
-                    </div>)))}
+                    </div>
+                  ))
+                )}
                 <Button variant="link" className="h-auto px-0 text-primary" asChild>
                   <Link href="/me/sessions">View all sessions</Link>
                 </Button>
@@ -252,15 +323,46 @@ export function ClientHomeView() {
               <CardDescription>Reminders and coach updates.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
-              {DEFAULT_CLIENT_NOTIFICATIONS.map((n) => (<div key={n.id} className={cn("rounded-xl border px-3 py-2.5", toneRing(n.tone))}>
-                  <div className="flex items-start justify-between gap-2">
-                    <p className="text-sm font-medium text-foreground">{n.title}</p>
-                    <span className="shrink-0 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-                      {n.timeLabel}
-                    </span>
-                  </div>
-                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{n.body}</p>
-                </div>))}
+              {notifications.length === 0 ? (
+                <EmptyState
+                  compact
+                  icon={Bell}
+                  title="No notifications yet"
+                  description="Reminders and coach updates will appear here when you have activity."
+                />
+              ) : (
+                notifications.map((n) => (
+                  <button
+                    key={n.id}
+                    type="button"
+                    onClick={() => {
+                      if (!n.read) {
+                        void apiMarkNotificationRead(n.id).then(() => {
+                          setNotifications((prev) =>
+                            prev.map((x) =>
+                              x.id === n.id ? { ...x, read: true } : x,
+                            ),
+                          );
+                          notifyClientPortalUpdated();
+                        });
+                      }
+                    }}
+                    className={cn(
+                      "w-full rounded-xl border px-3 py-2.5 text-left transition-opacity",
+                      toneRing(n.tone),
+                      n.read && "opacity-60",
+                    )}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="text-sm font-medium text-foreground">{n.title}</p>
+                      <span className="shrink-0 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                        {n.timeLabel}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{n.body}</p>
+                  </button>
+                ))
+              )}
             </CardContent>
           </Card>
 
@@ -273,7 +375,7 @@ export function ClientHomeView() {
             </CardHeader>
             <CardContent className="space-y-3 text-sm text-muted-foreground">
               <p>
-                Momentum is strongest on <span className="font-medium text-foreground">conditioning</span> days — keep
+                Momentum is strongest on <span className="font-medium text-foreground">conditioning</span> days. Keep
                 two easy aerobic sessions between heavy lower days.
               </p>
               <Button variant="secondary" size="sm" className="w-full rounded-xl" asChild>

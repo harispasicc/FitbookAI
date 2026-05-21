@@ -9,7 +9,11 @@ import { useIsBreakpointLg } from "@/hooks/use-is-breakpoint-lg";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { DashboardTopBar } from "@/components/dashboard/dashboard-topbar";
+import { BookingsProvider } from "@/contexts/bookings-data-context";
+import { TrainerWorkspaceProvider } from "@/contexts/trainer-workspace-context";
 import { useAuth } from "@/contexts/auth-context";
+import { useTrainerPlan } from "@/hooks/use-trainer-plan";
+import { TRAINER_NAV_GATES } from "@/lib/trainer-plans";
 type NavItem = {
     href: string;
     label: string;
@@ -38,7 +42,8 @@ export function DashboardShell({ children }: {
 }) {
     const pathname = usePathname();
     const router = useRouter();
-    const { logout, user } = useAuth();
+    const { logout } = useAuth();
+    const { canAccessRoute } = useTrainerPlan();
     const [mobileOpen, setMobileOpen] = useState(false);
     const [collapsed, setCollapsed] = useState(false);
     function handleLogout() {
@@ -78,17 +83,27 @@ export function DashboardShell({ children }: {
         <nav className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto overflow-x-hidden p-2">
           {nav.map(({ href, label, sub, icon: Icon }) => {
             const active = isActive(pathname, href);
-            const tip = sub ? `${label} — ${sub}` : label;
+            const gate = TRAINER_NAV_GATES[href];
+            const locked = gate ? !canAccessRoute(href) : false;
+            const tip = locked
+              ? `${label} — requires ${gate!.badge}`
+              : sub
+                ? `${label} — ${sub}`
+                : label;
             return (<Link key={href} href={href} title={tip} onClick={() => setMobileOpen(false)} className={cn("flex min-h-11 w-full min-w-0 touch-manipulation items-center gap-3 rounded-xl px-2.5 py-2.5 text-left text-sm transition-colors lg:min-h-0", active
                     ? "bg-orange-50 text-orange-600"
-                    : "text-zinc-800 hover:bg-zinc-100 hover:text-zinc-950", compact && "justify-center gap-0 px-0 py-2.5")}>
-                <Icon className={cn("size-5 shrink-0 stroke-[1.75]", active ? "text-orange-600" : "text-zinc-800")} aria-hidden/>
+                    : locked
+                      ? "text-zinc-500 hover:bg-zinc-100"
+                      : "text-zinc-800 hover:bg-zinc-100 hover:text-zinc-950", compact && "justify-center gap-0 px-0 py-2.5")}>
+                <Icon className={cn("size-5 shrink-0 stroke-[1.75]", active ? "text-orange-600" : locked ? "text-zinc-400" : "text-zinc-800")} aria-hidden/>
                 <span className="sidebar-nav-label flex min-h-0 min-w-0 flex-1 flex-col items-stretch overflow-hidden leading-snug">
                   <span className={cn("block truncate font-semibold tracking-tight", active ? "text-orange-600" : "text-zinc-900")}>
                     {label}
                   </span>
                   {sub ? (<span className={cn("mt-0.5 block truncate text-xs font-medium", active ? "text-orange-500/90" : "sidebar-nav-label-muted")}>
                       {sub}
+                    </span>) : locked ? (<span className="mt-0.5 block truncate text-xs font-medium text-primary">
+                      {gate!.badge}
                     </span>) : null}
                 </span>
               </Link>);
@@ -96,6 +111,12 @@ export function DashboardShell({ children }: {
         </nav>
 
         <div className="mt-auto shrink-0 border-t border-zinc-200 p-2">
+          {!compact && planContext ? (
+            <p className="sidebar-nav-label mb-2 px-2.5 text-[11px] text-zinc-500">
+              Plan:{" "}
+              <span className="font-semibold text-zinc-800">{planContext.planName}</span>
+            </p>
+          ) : null}
           <Button type="button" variant="ghost" title="Odjavi se" onClick={handleLogout} className={cn("h-auto min-h-11 w-full justify-start gap-3 rounded-xl px-2.5 py-2.5 text-zinc-800 hover:bg-red-50 hover:text-red-700", compact && "justify-center px-0")}>
             <LogOut className="size-5 shrink-0 text-zinc-600" aria-hidden/>
             <span className="sidebar-nav-label flex min-w-0 flex-1 flex-col items-start text-left">
@@ -109,7 +130,9 @@ export function DashboardShell({ children }: {
         <DashboardTopBar onMenuClick={() => setMobileOpen(true)} showBrandInNavbar={showNavbarBrand}/>
         <main className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
           <div className="mx-auto w-full min-w-0 max-w-6xl px-3 py-6 min-[400px]:px-4 sm:px-6 sm:py-8 lg:px-8 lg:py-10 2xl:max-w-7xl">
-            {children}
+            <BookingsProvider>
+              <TrainerWorkspaceProvider>{children}</TrainerWorkspaceProvider>
+            </BookingsProvider>
           </div>
         </main>
       </div>

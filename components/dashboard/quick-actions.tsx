@@ -3,7 +3,7 @@ import { BarChart3, CalendarPlus, Sparkles, UserPlus } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 const actions = [
-    { label: "New booking", href: "/calendar", icon: CalendarPlus },
+    { label: "Calendar", href: "/calendar", icon: CalendarPlus },
     { label: "Add client", href: "/clients", icon: UserPlus },
     { label: "AI Assistant", href: "/ai", icon: Sparkles },
     { label: "Analytics", href: "/analytics", icon: BarChart3 },

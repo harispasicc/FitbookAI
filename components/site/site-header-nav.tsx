@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { createPortal } from "react-dom";
 import { useEffect, useId, useState, type ReactNode } from "react";
 import { BrandLogoLink } from "@/components/site/brand-logo-link";
+import { deferEffect } from "@/lib/defer-effect";
 import { cn } from "@/lib/utils";
 export type SiteHeaderNavLink = {
     href: string;
@@ -30,10 +31,10 @@ export function SiteHeaderNav({ links, mobilePrefix = [], trailingSlot, classNam
     const pathname = usePathname();
     const panelId = useId();
     useEffect(() => {
-        setMounted(true);
+        deferEffect(() => setMounted(true));
     }, []);
     useEffect(() => {
-        setOpen(false);
+        deferEffect(() => setOpen(false));
     }, [pathname]);
     useEffect(() => {
         if (!open)

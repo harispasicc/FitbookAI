@@ -78,6 +78,12 @@ body {
   background-color: var(--background);
   padding-left: env(safe-area-inset-left, 0px);
   padding-right: env(safe-area-inset-right, 0px);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background-color: oklch(0.5 0.14 195 / 0.2);
 }
 
 #dashboard-sidebar {

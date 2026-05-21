@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import { useDeferredValue, useEffect, useMemo, useState, useTransition } from "react";
+import { useDeferredValue, useMemo, useState, useTransition } from "react";
 import { AnimatePresence, motion, LayoutGroup } from "framer-motion";
 import { MapPin, Monitor, Search, SlidersHorizontal, Sparkles, Star, Store, X } from "lucide-react";
 import type { MockTrainer } from "@/lib/mock-trainers";
@@ -61,12 +61,6 @@ export function BrowseCoachesView({ coaches, loadError = null }: BrowseCoachesVi
     const [specs, setSpecs] = useState<Set<string>>(() => new Set());
     const [showAllSpecs, setShowAllSpecs] = useState(false);
     const [isPending, startTransition] = useTransition();
-    const [mounted, setMounted] = useState(false);
-
-    useEffect(() => {
-        const t = setTimeout(() => setMounted(true), 120);
-        return () => clearTimeout(t);
-    }, []);
 
     const filtered = useMemo(() => {
         return coaches.filter((t) => coachMatchesSearch(t, deferredQuery) &&
@@ -91,10 +85,10 @@ export function BrowseCoachesView({ coaches, loadError = null }: BrowseCoachesVi
     }
     return (<div className="mx-auto min-w-0 max-w-6xl space-y-8 px-3 py-10 min-[400px]:px-4 sm:space-y-10 sm:px-6 sm:py-14">
       <motion.div className="max-w-2xl space-y-3" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}>
-        <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">Marketplace</p>
+        <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">Coach directory</p>
         <h1 className="text-balance text-2xl font-semibold tracking-tight sm:text-3xl md:text-4xl">Find your coach</h1>
         <p className="text-pretty text-sm text-muted-foreground sm:text-base">
-          Search by goal, filter by specialty and how you want to train — then open a profile to book.
+          Search by goal, filter by specialty and how you want to train, then open a profile to book.
         </p>
       </motion.div>
 
@@ -149,7 +143,7 @@ export function BrowseCoachesView({ coaches, loadError = null }: BrowseCoachesVi
           {showAllSpecs ? "Show fewer" : `Show all ${COACH_SPECIALIZATIONS.length} specialties`}
         </button>
         {!showAllSpecs ? (<p className="text-[11px] text-muted-foreground">
-            {SPECIALIZATION_GROUPS.map((g) => g.title).join(" · ")} — expand to pick niche filters.
+            {SPECIALIZATION_GROUPS.map((g) => g.title).join(" · ")}. Expand to pick niche filters.
           </p>) : null}
       </div>
 
@@ -168,9 +162,7 @@ export function BrowseCoachesView({ coaches, loadError = null }: BrowseCoachesVi
           <p className="mt-2 text-sm text-muted-foreground">{loadError}</p>
         </div>) : null}
 
-      {!mounted ? (<ul className="grid min-w-0 gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-hidden>
-          {Array.from({ length: 6 }).map((_, i) => (<li key={i} className="h-[340px] animate-pulse rounded-2xl border border-border/60 bg-muted/40"/>))}
-        </ul>) : (<AnimatePresence mode="popLayout">
+      <AnimatePresence mode="popLayout">
           {filtered.length === 0 ? (<motion.div key="empty" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="rounded-2xl border border-dashed border-border bg-muted/25 px-6 py-14 text-center">
               <Sparkles className="mx-auto size-10 text-primary/70" aria-hidden/>
               <p className="mt-4 text-base font-medium text-foreground">No coaches match these filters</p>
@@ -190,7 +182,7 @@ export function BrowseCoachesView({ coaches, loadError = null }: BrowseCoachesVi
                   <CoachCard trainer={trainer}/>
                 </motion.li>))}
             </motion.ul>)}
-        </AnimatePresence>)}
+        </AnimatePresence>
     </div>);
 }
 function CoachCard({ trainer }: {

@@ -13,7 +13,10 @@ export type ListAvailabilityQuery = z.infer<typeof listAvailabilityQuerySchema>;
 const coachWithStatsInclude = {
   user: { select: { id: true, email: true } },
   reviews: { select: { rating: true } },
-  services: { where: { isActive: true }, select: { id: true } },
+  services: {
+    where: { isActive: true },
+    select: { id: true, priceCents: true },
+  },
 } as const;
 
 export type CoachWithStats = Awaited<
@@ -80,6 +83,15 @@ export const coachesRepository = {
     const to =
       query.to ?? new Date(from.getTime() + 30 * 24 * 60 * 60 * 1000);
 
+    const slotFilters: object[] = [
+      { OR: [{ booking: null }, { booking: { status: "CANCELLED" } }] },
+    ];
+    if (query.serviceId) {
+      slotFilters.push({
+        OR: [{ serviceId: query.serviceId }, { serviceId: null }],
+      });
+    }
+
     const [weekly, slots] = await Promise.all([
       prisma.trainerWeeklyAvailability.findMany({
         where: { trainerProfileId: coachId },
@@ -90,6 +102,7 @@ export const coachesRepository = {
           trainerProfileId: coachId,
           isBooked: false,
           startsAt: { gte: from, lte: to },
+          AND: slotFilters,
         },
         orderBy: { startsAt: "asc" },
         take: query.limit,
@@ -98,13 +111,44 @@ export const coachesRepository = {
 
     return { weekly, slots };
   },
+
+  async countDistinctClients(coachId: string) {
+    const rows = await prisma.booking.findMany({
+      where: {
+        trainerProfileId: coachId,
+        status: { in: ["CONFIRMED", "COMPLETED"] },
+      },
+      select: { clientUserId: true },
+      distinct: ["clientUserId"],
+    });
+    return rows.length;
+  },
+
+  async findFeaturedReviews(limit: number) {
+    return prisma.trainerReview.findMany({
+      orderBy: { createdAt: "desc" },
+      take: limit,
+      include: {
+        trainerProfile: {
+          select: { fullName: true, specialty: true },
+        },
+      },
+    });
+  },
 };
 
-export function buildCoachStats(coach: NonNullable<CoachWithStats>) {
+export function buildCoachStats(
+  coach: NonNullable<CoachWithStats>,
+  clientsHelped?: number,
+) {
+  const priceCents = coach.services.map((s) => s.priceCents);
   return {
     averageRating: averageRating(coach.reviews),
     reviewCount: coach.reviews.length,
     serviceCount: coach.services.length,
+    minPriceCents: priceCents.length > 0 ? Math.min(...priceCents) : null,
+    yearsExperience: coach.yearsExperience,
+    clientsHelped: clientsHelped ?? 0,
   };
 }
 

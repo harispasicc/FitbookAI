@@ -25,7 +25,7 @@ export default function CoachPricingPage() {
             <p className="text-muted-foreground">
               These monthly tiers are what <span className="font-medium text-foreground">you</span> pay FitBook to
               run your practice (calendar, clients, AI, analytics). Your clients pay <span className="font-medium text-foreground">you</span>{" "}
-              for sessions — those prices live on each coach profile, not here.
+              for sessions. Those prices live on each coach profile, not here.
             </p>
             <p className="text-sm text-muted-foreground">
               Looking to book a coach instead?{" "}
@@ -67,7 +67,7 @@ export default function CoachPricingPage() {
           <div className="mt-14 rounded-xl border border-border bg-card p-6 shadow-sm sm:p-8">
             <p className="text-lg font-medium">Questions?</p>
             <p className="mt-2 text-sm text-muted-foreground">
-              Numbers are illustrative for the portfolio — swap in your billing provider when you ship.
+              Plan prices are starting points. Connect your billing provider when you are ready to charge coaches.
             </p>
             <Link href="/trainer/login" className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline">
               Coach sign in

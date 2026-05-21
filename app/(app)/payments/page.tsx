@@ -9,7 +9,7 @@ export default function PaymentsPage() {
       <div className="min-w-0 space-y-1">
         <h1 className="text-balance text-xl font-semibold tracking-tight min-[400px]:text-2xl">Payments</h1>
         <p className="text-sm text-muted-foreground">
-          Invoices, subscriptions, and payout summaries will live here — placeholder for a future Stripe integration.
+          Invoices, subscriptions, and payout summaries will live here. Stripe integration coming soon.
         </p>
       </div>
       <div className="grid gap-4 md:grid-cols-2">

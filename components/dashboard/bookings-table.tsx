@@ -1,66 +1,116 @@
 "use client";
+
+
+import { CalendarClock, RefreshCw } from "lucide-react";
+import { LoadingPlaceholder } from "@/components/ui/busy-dots";
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { useAuth } from "@/contexts/auth-context";
+import { BookingRowActions } from "@/components/dashboard/booking-row-actions";
 import { TrainerAvatar } from "@/components/visual/trainer-avatar";
-import { mockBookings } from "@/lib/mock-bookings";
+import { bookingStatusStyles } from "@/lib/booking-status-styles";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { productUi } from "@/lib/product-ui";
 import { cn } from "@/lib/utils";
-import { useDemoData } from "@/hooks/use-demo-data";
-function statusStyles(status: (typeof mockBookings)[number]["status"]) {
-    switch (status) {
-        case "confirmed":
-            return "bg-emerald-500/10 text-emerald-800";
-        case "pending":
-            return "bg-amber-500/10 text-amber-900";
-        case "cancelled":
-            return "bg-muted text-muted-foreground";
-        default:
-            return "";
-    }
-}
+import { useBookings } from "@/hooks/use-bookings";
+
 export function BookingsTable() {
-    const { data } = useDemoData();
-    const rows = data?.bookings?.length ? data.bookings : mockBookings;
-    return (<Card className="rounded-2xl border border-border/80 bg-card/90 shadow-sm backdrop-blur-sm">
+  const { user } = useAuth();
+  const { rows, loading, error, refresh } = useBookings();
+
+  return (
+    <Card>
       <CardHeader>
         <CardTitle className="text-base">Upcoming bookings</CardTitle>
         <CardDescription>
-          {data?.bookings?.length ? "From your workspace — replace with API data." : "Static sample — sign up to load full rows."}
+          Live bookings from your FitBook workspace.
         </CardDescription>
       </CardHeader>
       <CardContent className="px-0 sm:px-6">
-        <Table className="min-w-[36rem]">
-          <TableHeader>
-            <TableRow className="hover:bg-transparent">
-              <TableHead className="w-[100px]">ID</TableHead>
-              <TableHead>Guest</TableHead>
-              <TableHead className="hidden md:table-cell">Service</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Amount</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {rows.map((row) => (<TableRow key={row.id}>
-                <TableCell className="font-mono text-xs text-muted-foreground">{row.id}</TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <TrainerAvatar seed={row.guest} size="sm"/>
-                    <span className="font-medium">{row.guest}</span>
-                  </div>
-                </TableCell>
-                <TableCell className="hidden max-w-[220px] truncate md:table-cell text-muted-foreground">
-                  {row.service}
-                </TableCell>
-                <TableCell className="whitespace-nowrap text-muted-foreground">{row.date}</TableCell>
-                <TableCell>
-                  <span className={cn("inline-flex rounded-full px-2 py-0.5 text-xs font-medium capitalize", statusStyles(row.status))}>
-                    {row.status}
-                  </span>
-                </TableCell>
-                <TableCell className="text-right text-sm font-medium tabular-nums">{row.amount}</TableCell>
-              </TableRow>))}
-          </TableBody>
-        </Table>
+        {loading ? (
+          <LoadingPlaceholder className="mx-6 mb-6 border-0 bg-transparent" minHeight="min-h-[6rem]" />
+        ) : error ? (
+          <div className="space-y-3 px-6 pb-6">
+            <p className="text-sm text-destructive">{error}</p>
+            <Button type="button" variant="outline" size="sm" onClick={() => void refresh()}>
+              <RefreshCw className="mr-1.5 size-3.5" aria-hidden />
+              Try again
+            </Button>
+          </div>
+        ) : rows.length === 0 ? (
+          <div className="px-4 pb-6 sm:px-6">
+            <EmptyState
+              compact
+              icon={CalendarClock}
+              title="No bookings yet"
+              description="When clients book from your public profile, sessions appear here. Share your coach page to get started."
+            />
+          </div>
+        ) : (
+          <div className={productUi.tableShell}>
+          <Table className="min-w-[40rem]">
+            <TableHeader>
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="hidden w-[100px] sm:table-cell">ID</TableHead>
+                <TableHead>Client</TableHead>
+                <TableHead className="hidden md:table-cell">Service</TableHead>
+                <TableHead>When</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Amount</TableHead>
+                <TableHead className="w-[140px] text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {rows.map((row) => (
+                <TableRow key={row.id}>
+                  <TableCell className="hidden font-mono text-xs text-muted-foreground sm:table-cell">
+                    {row.id.slice(0, 8)}…
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <TrainerAvatar seed={row.guest} size="sm" />
+                      <span className="font-medium">{row.guest}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="hidden max-w-[220px] truncate text-muted-foreground md:table-cell">
+                    {row.service}
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap text-muted-foreground">
+                    {row.slotIso
+                      ? new Date(row.slotIso).toLocaleString(undefined, {
+                          month: "short",
+                          day: "numeric",
+                          hour: "numeric",
+                          minute: "2-digit",
+                        })
+                      : row.date}
+                  </TableCell>
+                  <TableCell>
+                    <span
+                      className={cn(
+                        "inline-flex rounded-full px-2 py-0.5 text-xs font-medium capitalize",
+                        bookingStatusStyles(row.status),
+                      )}
+                    >
+                      {row.status}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-right text-sm font-medium tabular-nums">
+                    {row.amount}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {user?.role === "trainer" ? (
+                      <BookingRowActions row={row} role="trainer" />
+                    ) : null}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+          </div>
+        )}
       </CardContent>
-    </Card>);
+    </Card>
+  );
 }

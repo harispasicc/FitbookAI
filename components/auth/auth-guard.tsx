@@ -1,31 +1,54 @@
 "use client";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useAuth } from "@/contexts/auth-context";
-import { Loader2 } from "lucide-react";
+import {
+  consumePostLogoutRedirect,
+  consumeSessionExpiredFlag,
+} from "@/lib/auth-session-events";
+import { AuthTransitionScreen } from "@/components/auth/auth-transition-screen";
+
 export function AuthGuard({ children }: {
     children: React.ReactNode;
 }) {
     const { user, isHydrated } = useAuth();
     const router = useRouter();
+    const pathname = usePathname();
+
     useEffect(() => {
         if (!isHydrated)
             return;
         if (!user) {
-            router.replace("/");
+            if (consumePostLogoutRedirect()) {
+                router.replace("/");
+                return;
+            }
+            const expired = consumeSessionExpiredFlag();
+            if (expired) {
+                router.replace("/login?session=expired");
+                return;
+            }
+            const next = pathname?.startsWith("/me")
+                ? "/login"
+                : pathname?.startsWith("/dashboard") ||
+                    pathname?.startsWith("/calendar") ||
+                    pathname?.startsWith("/clients") ||
+                    pathname?.startsWith("/services") ||
+                    pathname?.startsWith("/analytics") ||
+                    pathname?.startsWith("/ai") ||
+                    pathname?.startsWith("/settings") ||
+                    pathname?.startsWith("/profile") ||
+                    pathname?.startsWith("/payments")
+                  ? "/trainer/login"
+                  : "/login";
+            router.replace(next);
         }
-    }, [isHydrated, user, router]);
+    }, [isHydrated, user, router, pathname]);
     if (!isHydrated) {
-        return (<div className="flex min-h-dvh flex-1 flex-col items-center justify-center bg-background text-muted-foreground">
-        <Loader2 className="size-8 animate-spin" aria-hidden/>
-        <span className="sr-only">Loading session</span>
-      </div>);
+        return <AuthTransitionScreen variant="fullscreen" label="Loading your workspace" />;
     }
     if (!user) {
-        return (<div className="flex min-h-dvh flex-1 flex-col items-center justify-center bg-background text-muted-foreground">
-        <Loader2 className="size-8 animate-spin" aria-hidden/>
-        <span className="sr-only">Redirecting</span>
-      </div>);
+        return <AuthTransitionScreen variant="fullscreen" label="Redirecting" />;
     }
     return <>{children}</>;
 }

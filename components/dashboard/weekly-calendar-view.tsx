@@ -1,14 +1,19 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Clock, X } from "lucide-react";
 import type { BookingRow } from "@/lib/mock-bookings";
-import { mockBookings } from "@/lib/mock-bookings";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useDemoData } from "@/hooks/use-demo-data";
+import { useBookings } from "@/hooks/use-bookings";
+import { apiListTrainerCalendarSlots, type CalendarOpenSlotDto } from "@/lib/trainer-portal-api";
 import { TrainerAvatar } from "@/components/visual/trainer-avatar";
+import {
+  bookingStatusCalendarClass,
+  bookingStatusCalendarUsesLightText,
+} from "@/lib/booking-status-styles";
 import { cn } from "@/lib/utils";
+
 function startOfWeekMonday(d: Date) {
     const x = new Date(d);
     const day = x.getDay();
@@ -25,28 +30,42 @@ function addDays(d: Date, n: number) {
 function sameDay(a: Date, b: Date) {
     return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 }
-function statusColor(status: BookingRow["status"]) {
-    switch (status) {
-        case "confirmed":
-            return "border-emerald-500/40 bg-emerald-500/10 text-emerald-950";
-        case "pending":
-            return "border-amber-500/40 bg-amber-500/10 text-amber-950";
-        case "cancelled":
-            return "border-border bg-muted/50 text-muted-foreground line-through";
-        default:
-            return "border-border bg-card";
-    }
-}
 export function WeeklyCalendarView() {
-    const { data } = useDemoData();
+    const { rows: bookings, loading } = useBookings();
     const [weekOffset, setWeekOffset] = useState(0);
     const [detail, setDetail] = useState<BookingRow | null>(null);
-    const bookings = data?.bookings?.length ? data.bookings : mockBookings;
-    const { weekStart, days } = useMemo(() => {
+    const [openSlots, setOpenSlots] = useState<CalendarOpenSlotDto[]>([]);
+    const { days } = useMemo(() => {
         const base = addDays(startOfWeekMonday(new Date()), weekOffset * 7);
         const daysArr = Array.from({ length: 7 }, (_, i) => addDays(base, i));
-        return { weekStart: base, days: daysArr };
+        return { days: daysArr };
     }, [weekOffset]);
+
+    useEffect(() => {
+        const from = days[0]!;
+        const to = new Date(days[6]!);
+        to.setHours(23, 59, 59, 999);
+        void apiListTrainerCalendarSlots(from, to)
+            .then(setOpenSlots)
+            .catch(() => setOpenSlots([]));
+    }, [days]);
+
+    const openSlotsByDay = useMemo(() => {
+        const map = new Map<string, CalendarOpenSlotDto[]>();
+        for (const day of days) {
+            map.set(day.toISOString().slice(0, 10), []);
+        }
+        for (const s of openSlots) {
+            const key = new Date(s.startsAt).toISOString().slice(0, 10);
+            if (!map.has(key)) continue;
+            map.get(key)!.push(s);
+        }
+        for (const arr of map.values()) {
+            arr.sort((a, b) => a.startsAt.localeCompare(b.startsAt));
+        }
+        return map;
+    }, [openSlots, days]);
+
     const byDay = useMemo(() => {
         const map = new Map<string, BookingRow[]>();
         for (const day of days) {
@@ -74,7 +93,7 @@ export function WeeklyCalendarView() {
           <div>
             <CardTitle className="text-base">Week view</CardTitle>
             <CardDescription>
-              Session blocks from demo storage — structure ready for drag-and-drop scheduling.
+              {loading ? "Loading bookings…" : "Session blocks from your live bookings."}
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
@@ -103,9 +122,23 @@ export function WeeklyCalendarView() {
                     </span>
                   </div>
                   <div className="flex flex-1 flex-col gap-1.5">
-                    {list.map((b) => (<button key={b.id} type="button" data-booking-id={b.id} onClick={() => setDetail(b)} className={cn("touch-manipulation rounded-lg border px-2 py-1.5 text-left text-xs shadow-sm transition hover:opacity-95", statusColor(b.status))}>
-                        <span className="flex items-center gap-1 font-medium text-foreground">
-                          <Clock className="size-3 shrink-0 opacity-70" aria-hidden/>
+                    {list.map((b) => {
+                      const lightText = bookingStatusCalendarUsesLightText(b.status);
+                      return (
+                      <button key={b.id} type="button" data-booking-id={b.id} onClick={() => setDetail(b)} className={cn("touch-manipulation rounded-lg border px-2 py-1.5 text-left text-xs shadow-sm transition hover:opacity-95", bookingStatusCalendarClass(b.status))}>
+                        <span
+                          className={cn(
+                            "flex items-center gap-1 font-medium",
+                            lightText ? "text-white" : "text-foreground",
+                          )}
+                        >
+                          <Clock
+                            className={cn(
+                              "size-3 shrink-0",
+                              lightText ? "text-white/90" : "opacity-70",
+                            )}
+                            aria-hidden
+                          />
                           {b.slotIso
                         ? new Date(b.slotIso).toLocaleTimeString("en-US", {
                             hour: "numeric",
@@ -113,24 +146,39 @@ export function WeeklyCalendarView() {
                         })
                         : "—"}
                         </span>
-                        <span className="mt-0.5 block truncate text-[11px] text-muted-foreground">{b.guest}</span>
-                      </button>))}
-                    {list.length === 0 ? (<div className="mt-1 space-y-1">
-                        <span className="block rounded-md border border-dashed border-border/80 bg-muted/20 px-2 py-1 text-[10px] font-medium text-muted-foreground">
-                          Free · morning
+                        <span
+                          className={cn(
+                            "mt-0.5 block truncate text-[11px]",
+                            lightText ? "text-white/85" : "text-muted-foreground",
+                          )}
+                        >
+                          {b.guest}
                         </span>
-                        <span className="block rounded-md border border-dashed border-border/80 bg-muted/20 px-2 py-1 text-[10px] font-medium text-muted-foreground">
-                          Free · evening
+                      </button>
+                      );
+                    })}
+                    {list.length === 0 ? (
+                      (openSlotsByDay.get(key) ?? []).length === 0 ? (
+                        <span className="mt-1 block rounded-md border border-dashed border-border/80 bg-muted/20 px-2 py-1 text-[10px] font-medium text-muted-foreground">
+                          No open slots
                         </span>
-                      </div>) : null}
+                      ) : (
+                        <div className="mt-1 space-y-1">
+                          {(openSlotsByDay.get(key) ?? []).slice(0, 3).map((s) => (
+                            <span
+                              key={s.id}
+                              className="block rounded-md border border-dashed border-emerald-500/30 bg-emerald-500/5 px-2 py-1 text-[10px] font-medium text-emerald-900"
+                            >
+                              Open · {s.label}
+                            </span>
+                          ))}
+                        </div>
+                      )
+                    ) : null}
                   </div>
                 </div>);
         })}
           </div>
-          <p className="border-t border-border/60 px-4 py-3 text-xs text-muted-foreground">
-            Drag-and-drop: attach handlers to <code className="rounded bg-muted px-1">data-slot-day</code> cells and{" "}
-            <code className="rounded bg-muted px-1">data-booking-id</code> blocks.
-          </p>
         </CardContent>
       </Card>
 
@@ -167,7 +215,7 @@ export function WeeklyCalendarView() {
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <span className={cn("inline-flex rounded-full px-2 py-0.5 text-xs font-medium capitalize", statusColor(detail.status))}>
+                  <span className={cn("inline-flex rounded-full px-2 py-0.5 text-xs font-medium capitalize", bookingStatusCalendarClass(detail.status))}>
                     {detail.status}
                   </span>
                   <span className="inline-flex rounded-full border border-border bg-muted/40 px-2 py-0.5 text-xs font-medium tabular-nums text-foreground">

@@ -20,7 +20,7 @@ export async function generateMetadata({
     return { title: "Coach" };
   }
   return {
-    title: `${trainer.name} — coach profile`,
+    title: `${trainer.name}, coach profile`,
     description: trainer.bio,
   };
 }

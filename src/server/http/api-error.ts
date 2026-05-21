@@ -5,7 +5,11 @@ export type ApiErrorCode =
   | "EMAIL_TAKEN"
   | "INVALID_CREDENTIALS"
   | "ROLE_MISMATCH"
-  | "UNAUTHORIZED";
+  | "UNAUTHORIZED"
+  | "FORBIDDEN"
+  | "CONFLICT"
+  | "INVALID_RESET_TOKEN"
+  | "AI_DAILY_LIMIT";
 
 export class ApiError extends Error {
   readonly status: number;
@@ -39,5 +43,22 @@ export class ApiError extends Error {
 
   static unauthorized(message = "Unauthorized") {
     return new ApiError(401, message, "UNAUTHORIZED");
+  }
+
+  static forbidden(message = "Forbidden") {
+    return new ApiError(403, message, "FORBIDDEN");
+  }
+
+  static conflict(message: string, details?: unknown) {
+    return new ApiError(409, message, "CONFLICT", details);
+  }
+
+  static aiDailyLimitReached(limit: number) {
+    return new ApiError(
+      429,
+      `You have used all ${limit} FitBook AI messages for today. Try again tomorrow.`,
+      "AI_DAILY_LIMIT",
+      { limit },
+    );
   }
 }

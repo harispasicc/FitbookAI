@@ -13,19 +13,19 @@ export default function ProductServicesPage() {
         <p>FitBook AI is organized around a few core surfaces:</p>
         <ul className="list-inside list-disc space-y-2 pl-1">
           <li>
-            <span className="font-medium text-foreground">Calendar & bookings</span> — see what is coming up, keep
-            sessions structured, and leave room for a real scheduler integration later.
+            <span className="font-medium text-foreground">Calendar & bookings</span>: see what is coming up, keep
+            sessions structured, and sync with your availability.
           </li>
           <li>
-            <span className="font-medium text-foreground">Clients & services</span> — roster, packages, and context
+            <span className="font-medium text-foreground">Clients & services</span>: roster, packages, and context
             so you are not jumping between spreadsheets.
           </li>
           <li>
-            <span className="font-medium text-foreground">AI assistant</span> — draft reminders and answer repetitive
+            <span className="font-medium text-foreground">AI assistant</span>: draft reminders and answer repetitive
             questions with guardrails you control.
           </li>
           <li>
-            <span className="font-medium text-foreground">Analytics</span> — bookings, revenue, and retention signals
+            <span className="font-medium text-foreground">Analytics</span>: bookings, revenue, and retention signals
             tuned for small teams.
           </li>
         </ul>

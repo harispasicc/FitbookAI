@@ -15,7 +15,7 @@ export const metadata: Metadata = {
         default: "FitBook AI",
         template: "%s · FitBook AI",
     },
-    description: "AI booking assistant for coaches — browser-based dashboard.",
+    description: "AI booking assistant for coaches. Browser-based dashboard.",
 };
 export default function RootLayout({ children, }: Readonly<{
     children: React.ReactNode;

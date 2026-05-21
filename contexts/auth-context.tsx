@@ -16,7 +16,17 @@ import {
   apiRegister,
   type ApiAuthUser,
 } from "@/lib/auth-api";
-import { clearDemoState, seedDemoState } from "@/lib/demo-storage";
+import { apiPatchClientProfile } from "@/lib/client-portal-api";
+import { clearClientAiChat } from "@/lib/client-ai-chat-storage";
+import { clearDemoState } from "@/lib/demo-storage";
+import { notifyClientPortalUpdated } from "@/lib/demo-data-events";
+import {
+  AUTH_SESSION_EXPIRED_EVENT,
+  clearSessionExpiredFlag,
+  markPostLogoutRedirect,
+  markSessionExpired,
+} from "@/lib/auth-session-events";
+import { authUsersEqual } from "@/lib/auth-user-equals";
 
 const CLIENT_TRAINER_PREF_KEY = "saas-dashboard-client-trainer";
 
@@ -51,7 +61,12 @@ export type AuthLoginResult =
 
 export type AuthSignupResult =
   | { ok: true; user: AuthUser }
-  | { ok: false; message: string; code?: string };
+  | {
+      ok: false;
+      message: string;
+      code?: string;
+      issues?: { field: string; message: string }[];
+    };
 
 type AuthContextValue = {
   user: AuthUser | null;
@@ -68,7 +83,7 @@ type AuthContextValue = {
     options?: AuthSignupOptions,
   ) => Promise<AuthSignupResult>;
   updateProfile: (updates: { name?: string }) => void;
-  selectTrainerForClient: (trainerId: string) => void;
+  selectTrainerForClient: (trainerId: string) => Promise<void>;
   logout: () => Promise<void>;
 };
 
@@ -131,6 +146,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return;
         }
 
+        clearSessionExpiredFlag();
         const pref =
           apiUser.role === "client" ? readClientTrainerPref() : undefined;
         setUser(mapApiUser(apiUser, pref));
@@ -148,6 +164,75 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     void hydrate();
     return () => {
       cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isHydrated) return;
+
+    async function syncSession() {
+      try {
+        const apiUser = await apiMe();
+        if (!apiUser) {
+          setUser((prev) => {
+            if (prev) markSessionExpired();
+            return null;
+          });
+          return;
+        }
+        clearSessionExpiredFlag();
+        const pref =
+          apiUser.role === "client" ? readClientTrainerPref() : undefined;
+        const next = mapApiUser(apiUser, pref);
+        setUser((prev) => (authUsersEqual(prev, next) ? prev : next));
+      } catch {
+        setUser((prev) => {
+          if (prev) markSessionExpired();
+          return null;
+        });
+      }
+    }
+
+    function onFocus() {
+      void syncSession();
+    }
+
+    function onVisible() {
+      if (document.visibilityState === "visible") {
+        void syncSession();
+      }
+    }
+
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [isHydrated]);
+
+  useEffect(() => {
+    function onSessionExpired() {
+      void (async () => {
+        setUser((current) => {
+          if (current?.id) {
+            clearClientAiChat(current.id);
+          }
+          return null;
+        });
+        writeClientTrainerPref(undefined);
+        clearDemoState();
+        try {
+          await apiLogout();
+        } catch {
+          /* cookie may already be invalid */
+        }
+      })();
+    }
+
+    window.addEventListener(AUTH_SESSION_EXPIRED_EVENT, onSessionExpired);
+    return () => {
+      window.removeEventListener(AUTH_SESSION_EXPIRED_EVENT, onSessionExpired);
     };
   }, []);
 
@@ -184,8 +269,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (tid && result.user.role === "client") {
         writeClientTrainerPref(tid);
+        void apiPatchClientProfile({ selectedTrainerProfileId: tid });
       }
 
+      clearSessionExpiredFlag();
       const next = mapApiUser(
         result.user,
         result.user.role === "client" ? (tid ?? readClientTrainerPref()) : undefined,
@@ -221,14 +308,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           ok: false,
           message: result.message,
           code: result.code,
+          issues: result.issues,
         };
       }
 
       if (tid && result.user.role === "client") {
         writeClientTrainerPref(tid);
+        void apiPatchClientProfile({ selectedTrainerProfileId: tid });
       }
 
-      seedDemoState();
+      clearSessionExpiredFlag();
       const next = mapApiUser(result.user, tid);
       setUser(next);
       return { ok: true, user: next };
@@ -237,11 +326,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const logout = useCallback(async () => {
+    const userId = user?.id;
+    markPostLogoutRedirect();
     await apiLogout();
     clearDemoState();
     writeClientTrainerPref(undefined);
+    if (userId) {
+      clearClientAiChat(userId);
+    }
     setUser(null);
-  }, []);
+  }, [user?.id]);
 
   const updateProfile = useCallback((updates: { name?: string }) => {
     setUser((current) => {
@@ -260,14 +354,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const selectTrainerForClient = useCallback((trainerId: string) => {
+  const selectTrainerForClient = useCallback(async (trainerId: string) => {
     const tid = trainerId.trim();
     if (!tid) return;
     writeClientTrainerPref(tid);
+    const result = await apiPatchClientProfile({
+      selectedTrainerProfileId: tid,
+    });
+    if (!result.ok) return;
     setUser((current) => {
       if (!current || current.role !== "client") return current;
       return { ...current, selectedTrainerId: tid };
     });
+    notifyClientPortalUpdated();
   }, []);
 
   const value = useMemo(

@@ -16,8 +16,10 @@ export function TrainerProfileBookingCta({ trainerId }: TrainerProfileBookingCta
     const ctaClass = "mt-6 flex h-11 w-full items-center justify-center rounded-xl bg-primary text-sm font-medium text-primary-foreground shadow-sm transition-opacity hover:opacity-90";
     if (isClient) {
         return (<Button type="button" className={ctaClass} onClick={() => {
-                selectTrainerForClient(trainerId);
-                router.push("/me");
+                void (async () => {
+                    await selectTrainerForClient(trainerId);
+                    router.push("/me");
+                })();
             }}>
         Select coach
       </Button>);

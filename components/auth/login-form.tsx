@@ -3,34 +3,85 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
+import { DemoLoginPanel } from "@/components/auth/demo-login-panel";
+import {
+  CLIENT_DEMO_LOGIN_PATH,
+  CLIENT_LOGIN_PATH,
+  TRAINER_DEMO_LOGIN_PATH,
+  TRAINER_LOGIN_PATH,
+} from "@/lib/site-nav";
+import { AuthTransitionScreen } from "@/components/auth/auth-transition-screen";
 import { Button } from "@/components/ui/button";
+import { BusyDots } from "@/components/ui/busy-dots";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 export type LoginFormProps = {
     trainerId?: string;
     variant?: "client" | "trainer";
+    sessionExpired?: boolean;
+    demoMode?: boolean;
 };
-export function LoginForm({ trainerId, variant = "client" }: LoginFormProps) {
+export function LoginForm({
+    trainerId,
+    variant = "client",
+    sessionExpired = false,
+    demoMode = false,
+}: LoginFormProps) {
     const router = useRouter();
     const { user, isHydrated, login, logout } = useAuth();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [portalError, setPortalError] = useState<string | null>(null);
+    const [fieldErrors, setFieldErrors] = useState<{
+        email?: string;
+        password?: string;
+    }>({});
     const [submitting, setSubmitting] = useState(false);
+    const [redirecting, setRedirecting] = useState(false);
+
+    function validateFields(emailVal: string, passwordVal: string) {
+        const next: { email?: string; password?: string } = {};
+        const trimmed = emailVal.trim();
+        if (!trimmed) {
+            next.email = "Enter your email address.";
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+            next.email = "Enter a valid email address.";
+        }
+        if (!passwordVal) {
+            next.password = "Enter your password.";
+        } else if (passwordVal.length < 8) {
+            next.password = "Password must be at least 8 characters.";
+        }
+        setFieldErrors(next);
+        return Object.keys(next).length === 0;
+    }
     const isTrainerPortal = variant === "trainer";
     const signupHref = isTrainerPortal
         ? "/signup?intent=trainer"
         : trainerId
             ? `/signup?trainer=${encodeURIComponent(trainerId)}`
             : "/signup";
-    const otherLoginHref = isTrainerPortal ? "/login" : "/trainer/login";
-    const otherLoginLabel = isTrainerPortal ? "Client sign in" : "Coach sign in";
-    async function onSubmit(e: React.FormEvent) {
-        e.preventDefault();
+    const otherLoginHref = demoMode
+        ? isTrainerPortal
+            ? CLIENT_DEMO_LOGIN_PATH
+            : TRAINER_DEMO_LOGIN_PATH
+        : isTrainerPortal
+            ? CLIENT_LOGIN_PATH
+            : TRAINER_LOGIN_PATH;
+    const otherLoginLabel = demoMode
+        ? isTrainerPortal
+            ? `Client demo`
+            : `Coach demo`
+        : isTrainerPortal
+            ? "Client sign in"
+            : "Coach sign in";
+    const regularLoginHref = isTrainerPortal ? TRAINER_LOGIN_PATH : CLIENT_LOGIN_PATH;
+    async function performLogin(emailVal: string, passwordVal: string) {
         setPortalError(null);
         setSubmitting(true);
+        let navigated = false;
         try {
-            const result = await login(email, password, {
+            const result = await login(emailVal, passwordVal, {
                 selectedTrainerId: !isTrainerPortal && trainerId ? trainerId : undefined,
                 expectedRole: isTrainerPortal ? "trainer" : "client",
             });
@@ -44,17 +95,41 @@ export function LoginForm({ trainerId, variant = "client" }: LoginFormProps) {
                 }
                 return;
             }
-            router.push(result.user.role === "trainer" ? "/dashboard" : "/me");
+            navigated = true;
+            setRedirecting(true);
+            const dest = result.user.role === "trainer" ? "/dashboard" : "/me";
+            await router.replace(dest);
         } finally {
-            setSubmitting(false);
+            if (!navigated) {
+                setSubmitting(false);
+            }
         }
     }
+
+    async function onSubmit(e: React.FormEvent) {
+        e.preventDefault();
+        if (!validateFields(email, password)) {
+            return;
+        }
+        await performLogin(email.trim(), password);
+    }
     if (!isHydrated) {
-        return (<div className="space-y-4">
-        <div className="h-9 animate-pulse rounded-md bg-muted"/>
-        <div className="h-9 animate-pulse rounded-md bg-muted"/>
-        <div className="h-9 animate-pulse rounded-md bg-muted"/>
-      </div>);
+        return (
+          <AuthTransitionScreen label="Loading sign in" />
+        );
+    }
+    if (submitting || redirecting) {
+        return (
+          <AuthTransitionScreen
+            label={
+              redirecting
+                ? isTrainerPortal
+                  ? "Opening coach workspace"
+                  : "Opening your dashboard"
+                : "Signing in"
+            }
+          />
+        );
     }
     if (user) {
         return (<div className="space-y-4 rounded-lg border border-border bg-muted/30 p-4 text-sm">
@@ -78,7 +153,12 @@ export function LoginForm({ trainerId, variant = "client" }: LoginFormProps) {
         </div>
       </div>);
     }
-    return (<form className="space-y-4" onSubmit={onSubmit}>
+    return (<form className="space-y-4" onSubmit={onSubmit} noValidate>
+      {sessionExpired ? (
+        <div className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          You&apos;ve been signed out. Sign in again to continue.
+        </div>
+      ) : null}
       {portalError ? (<div className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {portalError}{" "}
           <Link href={otherLoginHref} className="font-medium underline underline-offset-2">
@@ -87,32 +167,116 @@ export function LoginForm({ trainerId, variant = "client" }: LoginFormProps) {
         </div>) : null}
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
-        <Input id="email" name="email" type="email" autoComplete="email" placeholder="you@company.com" value={email} onChange={(e) => {
+        <Input
+          id="email"
+          name="email"
+          type="email"
+          autoComplete="email"
+          placeholder="you@company.com"
+          value={email}
+          aria-invalid={fieldErrors.email ? true : undefined}
+          aria-describedby={fieldErrors.email ? "email-error" : undefined}
+          onChange={(e) => {
             setEmail(e.target.value);
             setPortalError(null);
-        }} required/>
+            if (fieldErrors.email) {
+              setFieldErrors((prev) => ({ ...prev, email: undefined }));
+            }
+          }}
+        />
+        {fieldErrors.email ? (
+          <p id="email-error" className="text-xs text-destructive" role="alert">
+            {fieldErrors.email}
+          </p>
+        ) : null}
       </div>
       <div className="space-y-2">
-        <Label htmlFor="password">Password</Label>
-        <Input id="password" name="password" type="password" autoComplete="current-password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required/>
-        <p className="text-xs text-muted-foreground">
-          Password must match your registered account (min. 8 characters).
-        </p>
+        <div className="flex items-center justify-between gap-2">
+          <Label htmlFor="password">Password</Label>
+          <Link
+            href={isTrainerPortal ? "/forgot-password?portal=trainer" : "/forgot-password"}
+            className="text-xs font-medium text-primary underline-offset-4 hover:underline"
+          >
+            Forgot password?
+          </Link>
+        </div>
+        <Input
+          id="password"
+          name="password"
+          type="password"
+          autoComplete="current-password"
+          placeholder="••••••••"
+          value={password}
+          aria-invalid={fieldErrors.password ? true : undefined}
+          aria-describedby={fieldErrors.password ? "password-error" : "password-hint"}
+          onChange={(e) => {
+            setPassword(e.target.value);
+            if (fieldErrors.password) {
+              setFieldErrors((prev) => ({ ...prev, password: undefined }));
+            }
+          }}
+        />
+        {fieldErrors.password ? (
+          <p id="password-error" className="text-xs text-destructive" role="alert">
+            {fieldErrors.password}
+          </p>
+        ) : (
+          <p id="password-hint" className="text-xs text-muted-foreground">
+            Password must match your registered account (min. 8 characters).
+          </p>
+        )}
       </div>
-      <Button type="submit" className="w-full" disabled={submitting}>
-        {isTrainerPortal ? "Coach sign in" : "Client sign in"}
+      <Button type="submit" className="w-full" disabled={submitting || redirecting}>
+        {submitting ? (
+          <span className="inline-flex items-center justify-center gap-2">
+            <BusyDots size="sm" className="[&_span]:bg-primary-foreground/90" />
+            Signing in
+          </span>
+        ) : isTrainerPortal ? (
+          "Coach sign in"
+        ) : (
+          "Client sign in"
+        )}
       </Button>
+      {demoMode ? (
+        <p className="text-center text-sm text-muted-foreground">
+          <Link href={regularLoginHref} className="font-medium text-primary underline-offset-4 hover:underline">
+            Sign in with your account
+          </Link>
+        </p>
+      ) : (
+        <p className="text-center text-sm text-muted-foreground">
+          No account?{" "}
+          <Link href={signupHref} className="font-medium text-primary underline-offset-4 hover:underline">
+            Create one
+          </Link>
+        </p>
+      )}
       <p className="text-center text-sm text-muted-foreground">
-        No account?{" "}
-        <Link href={signupHref} className="font-medium text-primary underline-offset-4 hover:underline">
-          Create one
-        </Link>
-      </p>
-      <p className="text-center text-sm text-muted-foreground">
-        {isTrainerPortal ? "Looking to book a coach?" : "Are you a coach?"}{" "}
+        {demoMode
+          ? isTrainerPortal
+            ? "Explore as a client?"
+            : "Explore as a coach?"
+          : isTrainerPortal
+            ? "Looking to book a coach?"
+            : "Are you a coach?"}{" "}
         <Link href={otherLoginHref} className="font-medium text-primary underline-offset-4 hover:underline">
           {otherLoginLabel}
         </Link>
       </p>
+      {demoMode ? (
+        <DemoLoginPanel
+          variant={isTrainerPortal ? "trainer" : "client"}
+          defaultOpen
+          disabled={submitting}
+          onUseDemo={(demoEmail, demoPassword) => {
+            setFieldErrors({});
+            setPortalError(null);
+            setEmail(demoEmail);
+            setPassword(demoPassword);
+            void performLogin(demoEmail, demoPassword);
+          }}
+        />
+      ) : null}
     </form>);
 }

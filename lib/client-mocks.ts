@@ -4,12 +4,13 @@ export type ClientNotification = {
     body: string;
     timeLabel: string;
     tone: "info" | "success" | "warning" | "neutral";
+    read?: boolean;
 };
 export const DEFAULT_CLIENT_NOTIFICATIONS: ClientNotification[] = [
     {
         id: "n1",
         title: "Session tomorrow",
-        body: "Lower-body strength at 18:00 — bring lifting shoes if you have them.",
+        body: "Lower-body strength at 18:00. Bring lifting shoes if you have them.",
         timeLabel: "2h ago",
         tone: "info",
     },
@@ -23,7 +24,7 @@ export const DEFAULT_CLIENT_NOTIFICATIONS: ClientNotification[] = [
     {
         id: "n3",
         title: "Attendance reminder",
-        body: "You missed 2 sessions this month — want to reschedule?",
+        body: "You missed 2 sessions this month. Want to reschedule?",
         timeLabel: "Mon",
         tone: "warning",
     },
@@ -50,7 +51,7 @@ export const MOCK_WORKOUT_HISTORY: WorkoutHistoryRow[] = [
         type: "Lower strength",
         durationMin: 58,
         calories: 412,
-        trainerNote: "Depth looked solid — add 2.5kg next week if RPE stays ≤8.",
+        trainerNote: "Depth looked solid. Add 2.5kg next week if RPE stays ≤8.",
     },
     {
         id: "w2",
@@ -58,7 +59,7 @@ export const MOCK_WORKOUT_HISTORY: WorkoutHistoryRow[] = [
         type: "Conditioning",
         durationMin: 42,
         calories: 498,
-        trainerNote: "Hold 85% on the bike — great pacing in round 3.",
+        trainerNote: "Hold 85% on the bike. Great pacing in round 3.",
     },
     {
         id: "w3",
@@ -74,6 +75,6 @@ export const MOCK_WORKOUT_HISTORY: WorkoutHistoryRow[] = [
         type: "Upper hypertrophy",
         durationMin: 55,
         calories: 360,
-        trainerNote: "Keep elbows 30–45° on presses — shoulders stayed quiet.",
+        trainerNote: "Keep elbows 30–45° on presses. Shoulders stayed quiet.",
     },
 ];

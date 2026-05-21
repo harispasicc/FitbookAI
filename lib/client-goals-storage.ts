@@ -2,11 +2,13 @@ export type GoalKey = "lose" | "muscle" | "conditioning" | "rehab";
 export type ClientGoalsState = {
     active: GoalKey;
     pct: Record<GoalKey, number>;
+    notes: Partial<Record<GoalKey, string>>;
 };
 export const CLIENT_GOALS_STORAGE_KEY = "fitbook-client-goals-v1";
 export const defaultClientGoals: ClientGoalsState = {
     active: "conditioning",
     pct: { lose: 34, muscle: 52, conditioning: 68, rehab: 41 },
+    notes: {},
 };
 export const goalLabels: Record<GoalKey, string> = {
     lose: "Lose weight",
@@ -24,7 +26,12 @@ export function readClientGoals(): ClientGoalsState {
         const p = JSON.parse(raw) as ClientGoalsState;
         if (!p || typeof p.active !== "string" || !p.pct)
             return defaultClientGoals;
-        return { ...defaultClientGoals, ...p, pct: { ...defaultClientGoals.pct, ...p.pct } };
+        return {
+            ...defaultClientGoals,
+            ...p,
+            pct: { ...defaultClientGoals.pct, ...p.pct },
+            notes: { ...defaultClientGoals.notes, ...p.notes },
+        };
     }
     catch {
         return defaultClientGoals;

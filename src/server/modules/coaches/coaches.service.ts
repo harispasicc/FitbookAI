@@ -40,7 +40,40 @@ export const coachesService = {
 
   async getCoachById(coachId: string) {
     const coach = await requireCoach(coachId);
-    return toCoachDetailDto(coach, buildCoachStats(coach));
+    const [reviewsRes, services, availability, clientsHelped] =
+      await Promise.all([
+        coachesRepository.findReviews(coachId, { limit: 12, offset: 0 }),
+        coachesRepository.findServices(coachId),
+        coachesRepository.findAvailability(coachId, { limit: 8 }),
+        coachesRepository.countDistinctClients(coachId),
+      ]);
+
+    const stats = buildCoachStats(coach, clientsHelped);
+    const availabilityDto = toCoachAvailabilityDto(
+      availability.weekly,
+      availability.slots,
+    );
+
+    return {
+      ...toCoachDetailDto(coach, stats),
+      stats,
+      reviews: reviewsRes.reviews.map(toCoachReviewDto),
+      services: services.map(toCoachServiceDto),
+      availability: availabilityDto,
+    };
+  },
+
+  async listFeaturedTestimonials(limit = 6) {
+    const reviews = await coachesRepository.findFeaturedReviews(limit);
+    return reviews.map((r) => ({
+      id: r.id,
+      authorName: r.authorName,
+      rating: r.rating,
+      comment: r.comment,
+      coachName: r.trainerProfile.fullName ?? "Coach",
+      coachSpecialty: r.trainerProfile.specialty,
+      createdAt: r.createdAt.toISOString(),
+    }));
   },
 
   async getCoachServices(coachId: string) {

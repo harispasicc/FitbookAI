@@ -3,11 +3,13 @@ export type BookingRow = {
     guest: string;
     service: string;
     date: string;
-    status: "confirmed" | "pending" | "cancelled";
+    status: "confirmed" | "pending" | "cancelled" | "completed";
     amount: string;
     slotIso?: string;
     trainerId?: string;
+    serviceId?: string;
     clientEmail?: string;
+    hasReview?: boolean;
 };
 export const mockBookings: BookingRow[] = [
     {

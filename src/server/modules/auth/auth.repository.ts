@@ -51,4 +51,46 @@ export const authRepository = {
       include: userWithProfiles,
     });
   },
+
+  updatePassword(userId: string, passwordHash: string) {
+    return prisma.user.update({
+      where: { id: userId },
+      data: { password: passwordHash },
+    });
+  },
+
+  invalidatePasswordResetTokens(userId: string) {
+    return prisma.passwordResetToken.updateMany({
+      where: { userId, usedAt: null },
+      data: { usedAt: new Date() },
+    });
+  },
+
+  createPasswordResetToken(input: {
+    userId: string;
+    tokenHash: string;
+    expiresAt: Date;
+  }) {
+    return prisma.passwordResetToken.create({
+      data: input,
+    });
+  },
+
+  findActivePasswordResetToken(tokenHash: string) {
+    return prisma.passwordResetToken.findFirst({
+      where: {
+        tokenHash,
+        usedAt: null,
+        expiresAt: { gt: new Date() },
+      },
+      include: { user: true },
+    });
+  },
+
+  markPasswordResetTokenUsed(id: string) {
+    return prisma.passwordResetToken.update({
+      where: { id },
+      data: { usedAt: new Date() },
+    });
+  },
 };

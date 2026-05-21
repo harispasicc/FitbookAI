@@ -112,14 +112,14 @@ export function LandingPlatformSection() {
             One platform. Two experiences.
           </h2>
           <p className="text-pretty text-muted-foreground sm:text-lg">
-            FitBook keeps training organized for people who show up—and for coaches who run the whole day behind the
+            FitBook keeps training organized for people who show up and for coaches who run the whole day behind the
             scenes. Same calm design language, tailored to how each side works.
           </p>
         </motion.div>
 
         <div className="grid min-w-0 gap-6 lg:grid-cols-2 lg:gap-8">
-          <AudienceCard variant="client" title="For clients" description="Discover coaches, book sessions that fit your life, and keep momentum with a dashboard built around your goals—not admin noise." bullets={clientBullets} peek={<MiniClientPeek />} primary={{ href: "/coaches", label: "Find coaches" }} secondary={{ href: "/login", label: "Client sign in" }}/>
-          <AudienceCard variant="coach" title="For coaches" description="Run bookings, client notes, and AI-assisted workflows from one surface—so you spend less time juggling tools and more time coaching." bullets={coachBullets} peek={<MiniCoachPeek />} primary={{ href: "/signup?intent=trainer", label: "Start coaching with FitBook" }} secondary={{ href: "/coach/pricing", label: "View coach plans" }}/>
+          <AudienceCard variant="client" title="For clients" description="Discover coaches, book sessions that fit your life, and keep momentum with a dashboard built around your goals, not admin noise." bullets={clientBullets} peek={<MiniClientPeek />} primary={{ href: "/coaches", label: "Find coaches" }} secondary={{ href: "/login", label: "Client sign in" }}/>
+          <AudienceCard variant="coach" title="For coaches" description="Run bookings, client notes, and AI-assisted workflows from one surface so you spend less time juggling tools and more time coaching." bullets={coachBullets} peek={<MiniCoachPeek />} primary={{ href: "/signup?intent=trainer", label: "Start coaching with FitBook" }} secondary={{ href: "/coach/pricing", label: "View coach plans" }}/>
         </div>
 
         <motion.p className="mt-8 text-center text-xs text-muted-foreground sm:mt-10" initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.2, duration: 0.4 }}>

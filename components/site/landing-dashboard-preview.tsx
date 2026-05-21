@@ -3,8 +3,14 @@ import { CalendarDays } from "lucide-react";
 import { AreaTrendChart, WeeklyBarsChart } from "@/components/visual/fitness-charts";
 import { Sparkline } from "@/components/visual/sparkline";
 import { fitnessImages } from "@/lib/media-urls";
-export function LandingDashboardPreview({ idPrefix = "lp" }: {
+export function LandingDashboardPreview({
+    idPrefix = "lp",
+    photoSrc = fitnessImages.heroCoach,
+    photoAlt = "Coach reviewing session notes with a client",
+}: {
     idPrefix?: string;
+    photoSrc?: string;
+    photoAlt?: string;
 }) {
     const p = idPrefix;
     return (<div className="relative min-w-0 overflow-hidden rounded-2xl border border-border/80 bg-card/90 shadow-xl shadow-black/10 ring-1 ring-black/[0.04] backdrop-blur-md">
@@ -31,10 +37,10 @@ export function LandingDashboardPreview({ idPrefix = "lp" }: {
         </div>
         <div className="mt-3 grid min-w-0 gap-3 lg:grid-cols-5">
           <div className="relative overflow-hidden rounded-2xl border border-border/70 bg-muted/20 lg:col-span-2">
-            <Image src={fitnessImages.heroCoach} alt="Coach reviewing session notes with a client" width={640} height={400} className="h-36 w-full object-cover sm:h-44" sizes="(max-width: 1024px) 100vw, 40vw" priority/>
+            <Image src={photoSrc} alt={photoAlt} width={640} height={400} className="h-36 w-full object-cover sm:h-44" sizes="(max-width: 1024px) 100vw, 40vw" priority/>
             <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent"/>
             <p className="absolute bottom-2 left-3 right-3 text-xs font-medium text-foreground drop-shadow-sm">
-              Real coaching workflows — bookings, clients, and AI in one surface.
+              Real coaching workflows: bookings, clients, and AI in one surface.
             </p>
           </div>
           <div className="rounded-2xl border border-border/70 bg-background/80 p-3 shadow-sm backdrop-blur-sm lg:col-span-3">

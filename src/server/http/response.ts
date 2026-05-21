@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { ZodError } from "zod";
 import { ApiError } from "@/server/http/api-error";
+import { formatZodError } from "@/server/validation/format-zod-error";
 
 export type ApiSuccess<T> = {
   data: T;
@@ -28,6 +29,17 @@ export function jsonOk<T>(
 
 export function jsonError(error: ApiError | ZodError | unknown) {
   if (error instanceof ApiError) {
+    if (error.code === "AI_DAILY_LIMIT") {
+      const body: ApiFailure = {
+        error: {
+          message: error.message,
+          code: error.code,
+          ...(error.details !== undefined ? { details: error.details } : {}),
+        },
+      };
+      return NextResponse.json(body, { status: 429 });
+    }
+
     const body: ApiFailure = {
       error: {
         message: error.message,
@@ -39,11 +51,12 @@ export function jsonError(error: ApiError | ZodError | unknown) {
   }
 
   if (error instanceof ZodError) {
+    const formatted = formatZodError(error);
     const body: ApiFailure = {
       error: {
-        message: "Validation failed",
+        message: formatted.message,
         code: "VALIDATION_ERROR",
-        details: error.flatten(),
+        details: { issues: formatted.issues },
       },
     };
     return NextResponse.json(body, { status: 400 });

@@ -8,7 +8,7 @@ export type TrainerOffering = {
     maxParticipants: number;
     kind: TrainerOfferingKind;
 };
-export function getTrainerOfferings(_trainerId: string): TrainerOffering[] {
+export function getTrainerOfferings(): TrainerOffering[] {
     return [
         {
             id: "of-1on1",

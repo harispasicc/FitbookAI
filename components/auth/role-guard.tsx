@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useAuth } from "@/contexts/auth-context";
-import { Loader2 } from "lucide-react";
+import { AuthTransitionScreen } from "@/components/auth/auth-transition-screen";
 type AppRole = "client" | "trainer";
 export function RoleGuard({ role, redirectTo, children, }: {
     role: AppRole;
@@ -19,16 +19,10 @@ export function RoleGuard({ role, redirectTo, children, }: {
         }
     }, [isHydrated, user, role, redirectTo, router]);
     if (!isHydrated || !user) {
-        return (<div className="flex min-h-dvh flex-1 flex-col items-center justify-center bg-background text-muted-foreground">
-        <Loader2 className="size-8 animate-spin" aria-hidden/>
-        <span className="sr-only">Loading</span>
-      </div>);
+        return <AuthTransitionScreen variant="fullscreen" label="Loading your workspace" />;
     }
     if (user.role !== role) {
-        return (<div className="flex min-h-dvh flex-1 flex-col items-center justify-center bg-background text-muted-foreground">
-        <Loader2 className="size-8 animate-spin" aria-hidden/>
-        <span className="sr-only">Redirecting</span>
-      </div>);
+        return <AuthTransitionScreen variant="fullscreen" label="Opening your dashboard" />;
     }
     return <>{children}</>;
 }

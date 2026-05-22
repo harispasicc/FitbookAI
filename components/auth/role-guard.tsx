@@ -19,10 +19,10 @@ export function RoleGuard({ role, redirectTo, children, }: {
         }
     }, [isHydrated, user, role, redirectTo, router]);
     if (!isHydrated || !user) {
-        return <AuthTransitionScreen variant="fullscreen" label="Loading your workspace" />;
+        return <AuthTransitionScreen variant="fullscreen" />;
     }
     if (user.role !== role) {
-        return <AuthTransitionScreen variant="fullscreen" label="Opening your dashboard" />;
+        return <AuthTransitionScreen variant="fullscreen" />;
     }
     return <>{children}</>;
 }

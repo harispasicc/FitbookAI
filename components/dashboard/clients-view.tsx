@@ -53,7 +53,7 @@ function clientMatchesQuery(client: TrainerClientDto, rawQuery: string) {
 
 export function ClientsView() {
   const searchParams = useSearchParams();
-  const { clients: rows, loading, error } = useTrainerClients();
+  const { clients: rows, loading, error, refresh } = useTrainerClients();
   const [q, setQ] = useState(() => searchParams.get("q") ?? "");
   const [status, setStatus] = useState<"all" | TrainerClientDto["status"]>("all");
   const [mode, setMode] = useState<"table" | "grid">("table");
@@ -62,6 +62,10 @@ export function ClientsView() {
     const fromUrl = searchParams.get("q");
     if (fromUrl) deferEffect(() => setQ(fromUrl));
   }, [searchParams]);
+
+  useEffect(() => {
+    deferEffect(() => void refresh());
+  }, [refresh]);
 
   const filtered = useMemo(() => {
     return rows.filter((r) => {
@@ -85,7 +89,7 @@ export function ClientsView() {
             Clients
           </h1>
           <p className="text-sm text-muted-foreground">
-            Clients who booked with you — from live session data.
+            Clients who booked with you, from live session data.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -245,6 +249,44 @@ export function ClientsView() {
                   : "No clients match your filters."}
               </p>
             ) : (
+              <>
+              <ul className="space-y-3 p-4 md:hidden">
+                {filtered.map((r) => (
+                  <li key={r.id}>
+                    <Link
+                      href={`/clients/${r.id}`}
+                      className="block rounded-xl border border-border/80 bg-muted/20 p-4 transition-colors hover:border-primary/25"
+                    >
+                      <div className="flex items-start gap-3">
+                        <TrainerAvatar seed={r.name} size="md" />
+                        <div className="min-w-0 flex-1">
+                          <p className="font-semibold text-foreground">{r.name}</p>
+                          <p className="text-sm text-muted-foreground">{r.goal}</p>
+                          <span className={cn("mt-2", clientStatusBadgeMarkup(r.status))}>
+                            {r.status}
+                          </span>
+                        </div>
+                        <ChevronRight className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+                      </div>
+                      <dl className="mt-3 grid grid-cols-2 gap-2 text-sm">
+                        <div>
+                          <dt className="text-xs text-muted-foreground">Sessions</dt>
+                          <dd className="font-medium tabular-nums">{r.sessions}</dd>
+                        </div>
+                        <div>
+                          <dt className="text-xs text-muted-foreground">Progress</dt>
+                          <dd className="font-medium tabular-nums">{r.progressPct}%</dd>
+                        </div>
+                        <div className="col-span-2">
+                          <dt className="text-xs text-muted-foreground">Next session</dt>
+                          <dd className="font-medium">{r.nextSession}</dd>
+                        </div>
+                      </dl>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              <div className="hidden md:block">
               <Table>
                 <TableHeader>
                   <TableRow className="border-border/80 bg-muted/30 hover:bg-muted/30">
@@ -327,6 +369,8 @@ export function ClientsView() {
                   ))}
                 </TableBody>
               </Table>
+              </div>
+              </>
             )}
           </CardContent>
         </Card>

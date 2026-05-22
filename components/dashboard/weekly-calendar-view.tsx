@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, Clock, X } from "lucide-react";
 import type { BookingRow } from "@/lib/mock-bookings";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { BusyDots } from "@/components/ui/busy-dots";
 import { useBookings } from "@/hooks/use-bookings";
 import { apiListTrainerCalendarSlots, type CalendarOpenSlotDto } from "@/lib/trainer-portal-api";
 import { TrainerAvatar } from "@/components/visual/trainer-avatar";
@@ -92,9 +93,7 @@ export function WeeklyCalendarView() {
         <CardHeader className="flex flex-col gap-4 border-b border-border/60 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <CardTitle className="text-base">Week view</CardTitle>
-            <CardDescription>
-              {loading ? "Loading bookings…" : "Session blocks from your live bookings."}
-            </CardDescription>
+            <CardDescription>Session blocks from your live bookings.</CardDescription>
           </div>
           <div className="flex items-center gap-2">
             <Button type="button" variant="outline" size="icon" className="size-9 shrink-0" aria-label="Previous week" onClick={() => setWeekOffset((w) => w - 1)}>
@@ -107,12 +106,17 @@ export function WeeklyCalendarView() {
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="grid min-w-0 auto-cols-fr grid-flow-col gap-px bg-border/60 max-md:overflow-x-auto md:grid-cols-7" data-calendar-week-root>
+          {loading ? (
+            <div className="flex min-h-[10rem] items-center justify-center p-6">
+              <BusyDots />
+            </div>
+          ) : (
+          <div className="grid min-w-0 grid-cols-1 gap-3 p-3 md:grid-cols-7 md:gap-px md:bg-border/60 md:p-0" data-calendar-week-root>
             {days.map((day) => {
             const key = day.toISOString().slice(0, 10);
             const list = byDay.get(key) ?? [];
             const isToday = sameDay(day, new Date());
-            return (<div key={key} data-slot-day={key} className={cn("flex min-h-[14rem] min-w-[7.5rem] flex-col bg-background p-2 md:min-w-0", isToday && "bg-primary/[0.04]")}>
+            return (<div key={key} data-slot-day={key} className={cn("flex min-h-[10rem] flex-col rounded-xl border border-border/80 bg-background p-3 md:min-h-[14rem] md:rounded-none md:border-0 md:p-2", isToday && "border-primary/30 bg-primary/[0.04] md:border-0")}>
                   <div className="mb-2 flex flex-col border-b border-border/50 pb-2">
                     <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
                       {day.toLocaleDateString("en-US", { weekday: "short" })}
@@ -179,6 +183,7 @@ export function WeeklyCalendarView() {
                 </div>);
         })}
           </div>
+          )}
         </CardContent>
       </Card>
 

@@ -53,8 +53,8 @@ export const TRAINER_PLANS: Record<TrainerPlanId, TrainerPlanDefinition> = {
       emailReminders: true,
       smsReminders: true,
       analytics: true,
-      aiAssistant: false,
-      aiScheduling: false,
+      aiAssistant: true,
+      aiScheduling: true,
       aiMealPlans: false,
       prioritySupport: false,
     },
@@ -84,7 +84,7 @@ export const TRAINER_NAV_GATES: Record<
   { minPlan: TrainerPlanId; badge: string }
 > = {
   "/analytics": { minPlan: "pro", badge: "Pro" },
-  "/ai": { minPlan: "ai_pro", badge: "AI Pro" },
+  "/ai": { minPlan: "pro", badge: "Pro" },
 };
 
 export function planRank(plan: TrainerPlanId): number {

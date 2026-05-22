@@ -9,10 +9,10 @@ export const metadata: Metadata = {
 export default function AiAssistantPage() {
   return (
     <PlanGate
-      minPlan="ai_pro"
+      minPlan="pro"
       feature="aiAssistant"
-      title="AI Assistant requires AI Pro"
-      description="Workout drafts, reminders, and progress summaries are part of the AI Pro plan."
+      title="AI Assistant requires Pro"
+      description="Workout drafts, reminders, and progress summaries are included on the Pro plan."
     >
       <TrainerAiToolsView />
     </PlanGate>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Loader2, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { BusyDots } from "@/components/ui/busy-dots";
 import {
   apiCreateServiceSlot,
@@ -117,7 +117,7 @@ export function ServiceOpenTimes({ service }: { service: TrainerServiceDto }) {
           />
         </div>
         <Button type="submit" size="sm" variant="secondary" disabled={saving} className="rounded-lg">
-          {saving ? <Loader2 className="size-4 animate-spin" /> : "Add time"}
+          {saving ? <BusyDots size="sm" className="[&_span]:bg-primary-foreground/90" /> : "Add time"}
         </Button>
       </form>
 
@@ -127,7 +127,7 @@ export function ServiceOpenTimes({ service }: { service: TrainerServiceDto }) {
         </div>
       ) : slots.length === 0 ? (
         <p className="text-xs text-muted-foreground">
-          No open times yet — add at least one so clients can complete booking.
+          No open times yet. Add at least one so clients can complete booking.
         </p>
       ) : (
         <ul className="space-y-1.5">

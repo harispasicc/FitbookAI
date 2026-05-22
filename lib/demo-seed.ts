@@ -83,7 +83,7 @@ export function buildDemoState(now = new Date()): DemoState {
             mode: "In person",
             maxParticipants: 1,
             active: true,
-            description: "Private floor coaching — strength, conditioning, or hybrid blocks tailored to you.",
+            description: "Private floor coaching: strength, conditioning, or hybrid blocks tailored to you.",
         },
         {
             id: "s2",
@@ -103,11 +103,11 @@ export function buildDemoState(now = new Date()): DemoState {
             mode: "Studio",
             maxParticipants: 12,
             active: true,
-            description: "Small-group HIIT or strength — scalable for mixed levels.",
+            description: "Small-group HIIT or strength, scalable for mixed levels.",
         },
     ];
     const guests = ["Alex Morgan", "Jordan Lee", "Sam Rivera", "Casey Wu", "Riley Brooks"];
-    const svcLabels = ["Private studio — 60m", "Strength block", "HIIT", "Mobility reset", "Nutrition check-in"];
+    const svcLabels = ["Private studio (60m)", "Strength block", "HIIT", "Mobility reset", "Nutrition check-in"];
     const bookings: BookingRow[] = Array.from({ length: 10 }).map((_, i): BookingRow => {
         const dayOffset = i - 2;
         const d = addDays(now, dayOffset);

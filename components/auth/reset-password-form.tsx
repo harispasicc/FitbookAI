@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { apiResetPassword } from "@/lib/auth-api";
+import { BusyDots } from "@/components/ui/busy-dots";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -64,7 +65,7 @@ export function ResetPasswordForm({ token, variant = "client" }: ResetPasswordFo
     return (
       <div className="space-y-3 rounded-lg border border-primary/25 bg-primary/5 px-3 py-3 text-sm">
         <p className="font-medium text-foreground">Password updated</p>
-        <p className="text-muted-foreground">Redirecting you to sign in…</p>
+        <p className="text-muted-foreground">Taking you to sign in…</p>
         <Link href={loginHref} className="font-medium text-primary underline-offset-4 hover:underline">
           Sign in now
         </Link>
@@ -116,7 +117,7 @@ export function ResetPasswordForm({ token, variant = "client" }: ResetPasswordFo
         />
       </div>
       <Button type="submit" className="w-full" disabled={submitting}>
-        {submitting ? "Updating…" : "Update password"}
+        {submitting ? <BusyDots size="sm" className="[&_span]:bg-primary-foreground/90" /> : "Update password"}
       </Button>
       <p className="text-center text-sm text-muted-foreground">
         <Link href={loginHref} className="font-medium text-primary underline-offset-4 hover:underline">

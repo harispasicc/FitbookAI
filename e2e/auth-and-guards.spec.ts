@@ -55,6 +55,8 @@ test("authentication, session cookie, and role boundaries", async ({
   await expect(page.getByLabel("Email")).toBeVisible();
   await page.getByLabel("Email").fill(DEMO_CLIENT.email);
   await page.getByLabel("Password").fill(DEMO_CLIENT.password);
-  await page.getByRole("button", { name: /^Sign in$/i }).click();
-  await expect(page.getByText(/client account|client sign in/i)).toBeVisible();
+  await page.getByRole("button", { name: /^Coach sign in$/i }).click();
+  await expect(
+    page.getByText("This email is a client account. Use client sign in instead."),
+  ).toBeVisible();
 });

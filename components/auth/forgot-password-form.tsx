@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { apiForgotPassword } from "@/lib/auth-api";
+import { BusyDots } from "@/components/ui/busy-dots";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -84,7 +85,7 @@ export function ForgotPasswordForm({ variant = "client" }: ForgotPasswordFormPro
             />
           </div>
           <Button type="submit" className="w-full" disabled={submitting}>
-            {submitting ? "Sending…" : "Send reset link"}
+            {submitting ? <BusyDots size="sm" className="[&_span]:bg-primary-foreground/90" /> : "Send reset link"}
           </Button>
         </>
       )}

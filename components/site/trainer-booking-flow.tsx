@@ -9,7 +9,6 @@ import {
   CalendarX,
   Check,
   ChevronRight,
-  Loader2,
   Lock,
   RefreshCw,
 } from "lucide-react";
@@ -22,6 +21,7 @@ import {
   type CoachServiceDto,
 } from "@/lib/bookings-api";
 import { notifyBookingsUpdated } from "@/lib/demo-data-events";
+import { BusyDots } from "@/components/ui/busy-dots";
 import { deferEffect } from "@/lib/defer-effect";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -235,9 +235,8 @@ export function TrainerBookingFlow({
           </motion.div>
         ) : loadState === "loading" ? (
           <div className="mt-6 min-h-[8rem] space-y-3">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Loader2 className="size-4 animate-spin" aria-hidden />
-              Loading services…
+            <div className="flex min-h-[6rem] items-center justify-center">
+              <BusyDots />
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               {[0, 1].map((i) => (
@@ -326,9 +325,8 @@ export function TrainerBookingFlow({
                     {selected.title}
                   </p>
                   {slotsLoading ? (
-                    <div className="flex min-h-[8rem] items-center justify-center gap-2 text-sm text-muted-foreground">
-                      <Loader2 className="size-4 animate-spin" aria-hidden />
-                      Loading open times…
+                    <div className="flex min-h-[8rem] items-center justify-center">
+                      <BusyDots />
                     </div>
                   ) : loadError && openSlots.length === 0 ? (
                     <div className="space-y-3">
@@ -439,13 +437,7 @@ export function TrainerBookingFlow({
                       disabled={submitting}
                     >
                       {submitting ? (
-                        <>
-                          <Loader2
-                            className="mr-1.5 size-3.5 animate-spin"
-                            aria-hidden
-                          />
-                          Booking…
-                        </>
+                        <BusyDots size="sm" className="[&_span]:bg-primary-foreground/90" />
                       ) : (
                         "Confirm booking"
                       )}

@@ -13,7 +13,7 @@ export function getTrainerOfferings(): TrainerOffering[] {
         {
             id: "of-1on1",
             title: "1-on-1 training",
-            description: "Private session — form coaching, progression, and accountability.",
+            description: "Private session with form coaching, progression, and accountability.",
             durationMin: 60,
             priceLabel: "From €45",
             maxParticipants: 1,
@@ -22,7 +22,7 @@ export function getTrainerOfferings(): TrainerOffering[] {
         {
             id: "of-group",
             title: "Group training",
-            description: "Small group strength or HIIT — scalable for mixed levels.",
+            description: "Small group strength or HIIT, scalable for mixed levels.",
             durationMin: 50,
             priceLabel: "From €18",
             maxParticipants: 10,

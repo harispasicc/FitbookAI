@@ -1,10 +1,12 @@
 import { test, expect, freshClientApi, freshTrainerApi } from "./fixtures";
 import {
   createBooking,
+  DEMO_COACH_PROFILE_NAME,
   findBookableSlot,
   findDemoCoachId,
   getPrimaryServiceId,
   patchBooking,
+  waitForBookingStatus,
 } from "./helpers/api";
 
 test.describe("Booking lifecycle", () => {
@@ -32,23 +34,27 @@ test.describe("Booking lifecycle", () => {
       await patchBooking(trainerApi, booking.id, { status: "confirmed" });
 
       await clientPage.goto("/me/sessions");
-      const sessionWhen = new Date(booking.startsAt).toLocaleString(undefined, {
-        month: "short",
-        day: "numeric",
-        hour: "numeric",
-        minute: "2-digit",
-      });
+      const sessionWhen = await clientPage.evaluate((iso) => {
+        return new Date(iso).toLocaleString(undefined, {
+          month: "short",
+          day: "numeric",
+          hour: "numeric",
+          minute: "2-digit",
+        });
+      }, booking.startsAt);
       const sessionRow = clientPage
         .getByRole("row")
         .filter({ hasText: booking.service.title })
+        .filter({ hasText: DEMO_COACH_PROFILE_NAME })
         .filter({ hasText: sessionWhen });
       await expect(sessionRow).toHaveCount(1);
       await expect(sessionRow).toContainText(/confirmed/i);
 
       await patchBooking(trainerApi, booking.id, { status: "completed" });
+      await waitForBookingStatus(clientApi, booking.id, "completed");
 
       await clientPage.reload();
-      await expect(sessionRow).toContainText(/completed/i);
+      await expect(sessionRow).toContainText(/completed/i, { timeout: 20_000 });
       const rateButton = sessionRow.getByRole("button", { name: "Rate session" });
       await expect(rateButton).toBeVisible();
 

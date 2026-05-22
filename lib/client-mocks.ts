@@ -31,7 +31,7 @@ export const DEFAULT_CLIENT_NOTIFICATIONS: ClientNotification[] = [
     {
         id: "n4",
         title: "Workout assigned",
-        body: "Tempo squats + bike intervals — estimated 52 min.",
+        body: "Tempo squats + bike intervals, estimated 52 min.",
         timeLabel: "Sun",
         tone: "neutral",
     },

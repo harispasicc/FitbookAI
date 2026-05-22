@@ -45,10 +45,10 @@ export function AuthGuard({ children }: {
         }
     }, [isHydrated, user, router, pathname]);
     if (!isHydrated) {
-        return <AuthTransitionScreen variant="fullscreen" label="Loading your workspace" />;
+        return <AuthTransitionScreen variant="fullscreen" />;
     }
     if (!user) {
-        return <AuthTransitionScreen variant="fullscreen" label="Redirecting" />;
+        return <AuthTransitionScreen variant="fullscreen" />;
     }
     return <>{children}</>;
 }

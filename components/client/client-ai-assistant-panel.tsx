@@ -2,7 +2,8 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2, LogIn, Send, Sparkles } from "lucide-react";
+import { LogIn, Send, Sparkles } from "lucide-react";
+import { BusyDots } from "@/components/ui/busy-dots";
 import { useAuth } from "@/contexts/auth-context";
 import { apiClientAssistant, type AiChatMessage } from "@/lib/ai-api";
 import {
@@ -246,9 +247,8 @@ function AiChatPanelBody({
           </AnimatePresence>
           {loading ? (
             <div className="flex justify-start">
-              <motion.div className="flex items-center gap-2 rounded-2xl border border-border/80 bg-card px-3 py-2 text-xs text-muted-foreground">
-                <Loader2 className="size-3.5 animate-spin" aria-hidden />
-                Thinking…
+              <motion.div className="rounded-2xl border border-border/80 bg-card px-3 py-2">
+                <BusyDots size="sm" />
               </motion.div>
             </div>
           ) : null}
@@ -316,11 +316,7 @@ function AiChatPanelBody({
             disabled={loading || dailyLimitReached || !input.trim()}
             aria-label="Send message"
           >
-            {loading ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <Send className="size-4" />
-            )}
+            {loading ? <BusyDots size="sm" /> : <Send className="size-4" />}
           </Button>
         </form>
 
@@ -349,7 +345,7 @@ export function ClientAiAssistantPanel({
           className,
         )}
       >
-        <Loader2 className="size-6 animate-spin text-muted-foreground" aria-hidden />
+        <BusyDots size="lg" />
       </Card>
     );
   }

@@ -1,7 +1,8 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { Check, Globe, Loader2, MapPin, Phone, Sparkles, User } from "lucide-react";
+import { Check, Globe, MapPin, Phone, Sparkles, User } from "lucide-react";
+import { BusyDots, LoadingPlaceholder } from "@/components/ui/busy-dots";
 import { useAuth } from "@/contexts/auth-context";
 import {
   defaultTrainerProfileExtension,
@@ -137,12 +138,7 @@ export function TrainerProfilePageView() {
         </p>
       </div>
 
-      {loading ? (
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="size-4 animate-spin" aria-hidden />
-          Loading profile…
-        </div>
-      ) : null}
+      {loading ? <LoadingPlaceholder minHeight="min-h-[12rem]" /> : null}
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
       <div className="grid min-w-0 gap-6 lg:grid-cols-[1fr_17rem] lg:items-start lg:gap-8">
@@ -284,19 +280,12 @@ export function TrainerProfilePageView() {
                   disabled={saving}
                   onClick={() => void onSave()}
                 >
-                  {saving ? (
-                    <>
-                      <Loader2 className="mr-2 size-4 animate-spin" aria-hidden />
-                      Saving…
-                    </>
-                  ) : (
-                    "Save changes"
-                  )}
+                  {saving ? <BusyDots size="sm" className="[&_span]:bg-primary-foreground/90" /> : "Save changes"}
                 </Button>
                 {saved ? (
                   <span className="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-700">
                     <Check className="size-4" aria-hidden />
-                    Saved — visible on Find coaches
+                    Saved. Visible on Find coaches
                   </span>
                 ) : null}
               </div>

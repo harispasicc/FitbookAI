@@ -4,7 +4,8 @@ import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Loader2, Package, Plus } from "lucide-react";
+import { Package, Plus } from "lucide-react";
+import { BusyDots } from "@/components/ui/busy-dots";
 import { EmptyState } from "@/components/ui/empty-state";
 import { LoadingPlaceholder } from "@/components/ui/busy-dots";
 import { useAuth } from "@/contexts/auth-context";
@@ -125,7 +126,7 @@ export function ServicesView() {
             Services
           </h1>
           <p className="text-sm text-muted-foreground">
-            Offerings clients see on your public profile — price, duration, and visibility.
+            Offerings clients see on your public profile: price, duration, and visibility.
           </p>
           {coachProfileId ? (
             <p className="text-xs text-muted-foreground">
@@ -213,7 +214,7 @@ export function ServicesView() {
               </div>
               <div className="flex gap-2 sm:col-span-2">
                 <Button type="submit" disabled={saving} className="rounded-xl">
-                  {saving ? <Loader2 className="size-4 animate-spin" /> : "Save service"}
+                  {saving ? <BusyDots size="sm" className="[&_span]:bg-primary-foreground/90" /> : "Save service"}
                 </Button>
                 <Button
                   type="button"

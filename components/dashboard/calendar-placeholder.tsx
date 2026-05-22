@@ -27,7 +27,7 @@ export function CalendarPlaceholder() {
               </div>
             </div>
             <p className="max-w-lg text-sm text-muted-foreground">
-              Wire Google Calendar, Cal.com, or your own scheduler — this canvas is ready for real availability
+              Wire Google Calendar, Cal.com, or your own scheduler. This canvas is ready for real availability
               layers.
             </p>
           </div>

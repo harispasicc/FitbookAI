@@ -24,7 +24,7 @@ function topSuggestedCoaches(ctx: ClientKnowledgeBase) {
       ...c,
       matchReason:
         ctx.goals?.active && c.specialty
-          ? `Listed on FitBook — check fit for ${ctx.goals.active}`
+          ? `Listed on FitBook. Check fit for ${ctx.goals.active}`
           : "Available on FitBook",
     }));
 }
@@ -322,7 +322,7 @@ function specialtyFallbackReply(context: ClientKnowledgeBase): string {
     coach.services.length > 0
       ? coach.services.map(
           (s) =>
-            `- **${s.title}** (${s.durationMinutes} min, ${formatPrice(s.priceCents)})${s.description ? ` — ${s.description}` : ""}`,
+            `- **${s.title}** (${s.durationMinutes} min, ${formatPrice(s.priceCents)})${s.description ? `: ${s.description}` : ""}`,
         )
       : [];
 
@@ -364,7 +364,7 @@ function coachSuggestionFallbackReply(context: ClientKnowledgeBase): string {
 
   const suggestions = topSuggestedCoaches(context);
   if (suggestions.length === 0) {
-    return "Browse **Find coaches** to see all trainers, their specialties, and reviews — then pick one and confirm them as your coach.";
+    return "Browse **Find coaches** to see all trainers, their specialties, and reviews. Then pick one and confirm them as your coach.";
   }
 
   const goalLabel = context.goals?.activeLabel
@@ -373,7 +373,7 @@ function coachSuggestionFallbackReply(context: ClientKnowledgeBase): string {
 
   const lines = suggestions.map((c, i) => {
     const label = c.fullName ?? "Coach";
-    const spec = c.specialty ? ` — **${c.specialty}**` : "";
+    const spec = c.specialty ? `, **${c.specialty}**` : "";
     const rating =
       c.reviewCount > 0 && c.averageRating !== null
         ? ` · **${c.averageRating}★** (${c.reviewCount} review${c.reviewCount === 1 ? "" : "s"})`
@@ -383,7 +383,7 @@ function coachSuggestionFallbackReply(context: ClientKnowledgeBase): string {
     return `${i + 1}. **${label}**${spec}${rating}${price}\n   _${c.matchReason}_`;
   });
 
-  return `You have not selected a coach yet. Based on ${goalLabel}, here are trainers worth a look:\n\n${lines.join("\n\n")}\n\nOpen **Find coaches**, open a profile, and book a first session — that links them as your coach.`;
+  return `You have not selected a coach yet. Based on ${goalLabel}, here are trainers worth a look:\n\n${lines.join("\n\n")}\n\nOpen **Find coaches**, open a profile, and book a first session. That links them as your coach.`;
 }
 
 function priceFallbackReply(context: ClientKnowledgeBase): string {
@@ -399,7 +399,7 @@ function priceFallbackReply(context: ClientKnowledgeBase): string {
 
   const lines = services.map(
     (s) =>
-      `- **${s.title}** — ${formatPrice(s.priceCents)} (${s.durationMinutes} min)`,
+      `- **${s.title}**: ${formatPrice(s.priceCents)} (${s.durationMinutes} min)`,
   );
   return `Session prices with **${coach.fullName}**:\n\n${lines.join("\n")}\n\nPick a service when you **Book a session**.`;
 }
@@ -417,7 +417,7 @@ export function clientAssistantFallback(
   const t = message.trim().toLowerCase();
 
   if (!t) {
-    return "Write a short question and I will help — try one of the suggested prompts.";
+    return "Write a short question and I will help. Try one of the suggested prompts.";
   }
 
   if (!context) {
@@ -465,7 +465,7 @@ export function clientAssistantFallback(
       return "You have no notifications yet.";
     }
     const latest = context.notifications.items[0];
-    return `You have **${unread}** unread notification${unread === 1 ? "" : "s"}. Latest: **${latest.title}** — ${latest.body}`;
+    return `You have **${unread}** unread notification${unread === 1 ? "" : "s"}. Latest: **${latest.title}**: ${latest.body}`;
   }
 
   if (t.includes("workout") || t.includes("trening")) {
@@ -485,7 +485,7 @@ export function clientAssistantFallback(
     const name = coachName(context);
     if (name) {
       const specialty = context.selectedCoach?.specialty
-        ? ` — specialty: **${context.selectedCoach.specialty}**`
+        ? `, specialty: **${context.selectedCoach.specialty}**`
         : "";
       return `Your coach is **${name}**${specialty}. See the **My coach** card on your dashboard or open their profile to book a session.`;
     }
@@ -501,7 +501,7 @@ export function clientAssistantFallback(
   }
 
   if (t.includes("hi") || t.includes("hello") || t.includes("zdravo") || t.includes("bok")) {
-    return "Hi — I am **FitBook AI**. Ask me anything about your sessions, goals, coaches, or bookings.";
+    return "Hi, I am **FitBook AI**. Ask me anything about your sessions, goals, coaches, or bookings.";
   }
 
   if (coachName(context)) {
@@ -527,15 +527,15 @@ export function trainerToolFallback(
 
   switch (tool) {
     case "generate_workout":
-      return `**Sample workout — ${who}** (offline preview)\n\n**Warm-up (8 min)**\n- Bike or brisk walk\n- Hip circles, band pull-aparts\n\n**Main**\n1. Goblet squat — 3×8 @ RPE 7\n2. Romanian deadlift — 3×8 @ RPE 7\n3. Split squat — 2×10 each leg\n\n**Finisher**\n- Farmer carry — 3×40m\n\n**Cooldown**\n- 5 min easy walk + breathing\n\n_Context: ${prompt.slice(0, 200)}_`;
+      return `**Sample workout: ${who}** (offline preview)\n\n**Warm-up (8 min)**\n- Bike or brisk walk\n- Hip circles, band pull-aparts\n\n**Main**\n1. Goblet squat: 3×8 @ RPE 7\n2. Romanian deadlift: 3×8 @ RPE 7\n3. Split squat: 2×10 each leg\n\n**Finisher**\n- Farmer carry: 3×40m\n\n**Cooldown**\n- 5 min easy walk + breathing\n\n_Context: ${prompt.slice(0, 200)}_`;
 
     case "generate_reminder":
-      return `Hi ${who.split(" ")[0] || "there"} — quick reminder about your upcoming session. Reply if you need to reschedule. See you soon!\n\n_(Draft based on: ${prompt.slice(0, 120)})_`;
+      return `Hi ${who.split(" ")[0] || "there"}, quick reminder about your upcoming session. Reply if you need to reschedule. See you soon!\n\n_(Draft based on: ${prompt.slice(0, 120)})_`;
 
     case "summarize_progress":
-      return `**Progress brief — ${who}**\n\n- Attendance: review last 30 days in your calendar\n- Focus: ${prompt.slice(0, 160) || "steady consistency"}\n- Suggestion: celebrate wins, adjust volume if RPE trends high\n\n_Connect OpenAI for richer summaries from live data._`;
+      return `**Progress brief: ${who}**\n\n- Attendance: review last 30 days in your calendar\n- Focus: ${prompt.slice(0, 160) || "steady consistency"}\n- Suggestion: celebrate wins, adjust volume if RPE trends high\n\n_Connect OpenAI for richer summaries from live data._`;
 
     case "reengagement_message":
-      return `Hey ${who.split(" ")[0] || "there"} — hope you are well. We have not trained together in a little while and I would love to get you back on track. Want to book a short check-in this week?\n\n_(Tone: warm, no pressure — ${prompt.slice(0, 100)})_`;
+      return `Hey ${who.split(" ")[0] || "there"}, hope you are well. We have not trained together in a little while and I would love to get you back on track. Want to book a short check-in this week?\n\n_(Tone: warm, no pressure; ${prompt.slice(0, 100)})_`;
   }
 }

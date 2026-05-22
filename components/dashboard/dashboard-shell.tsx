@@ -86,9 +86,9 @@ export function DashboardShell({ children }: {
             const gate = TRAINER_NAV_GATES[href];
             const locked = gate ? !canAccessRoute(href) : false;
             const tip = locked
-              ? `${label} — requires ${gate!.badge}`
+              ? `${label} (${gate!.badge} required)`
               : sub
-                ? `${label} — ${sub}`
+                ? `${label}: ${sub}`
                 : label;
             return (<Link key={href} href={href} title={tip} onClick={() => setMobileOpen(false)} className={cn("flex min-h-11 w-full min-w-0 touch-manipulation items-center gap-3 rounded-xl px-2.5 py-2.5 text-left text-sm transition-colors lg:min-h-0", active
                     ? "bg-orange-50 text-orange-600"
@@ -126,15 +126,17 @@ export function DashboardShell({ children }: {
         </div>
       </aside>
 
-      <div className="flex min-h-dvh min-w-0 flex-1 flex-col bg-background">
-        <DashboardTopBar onMenuClick={() => setMobileOpen(true)} showBrandInNavbar={showNavbarBrand}/>
-        <main className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
-          <div className="mx-auto w-full min-w-0 max-w-6xl px-3 py-6 min-[400px]:px-4 sm:px-6 sm:py-8 lg:px-8 lg:py-10 2xl:max-w-7xl">
-            <BookingsProvider>
-              <TrainerWorkspaceProvider>{children}</TrainerWorkspaceProvider>
-            </BookingsProvider>
+      <BookingsProvider>
+        <TrainerWorkspaceProvider>
+          <div className="flex min-h-dvh min-w-0 flex-1 flex-col bg-background">
+            <DashboardTopBar onMenuClick={() => setMobileOpen(true)} showBrandInNavbar={showNavbarBrand}/>
+            <main className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
+              <div className="mx-auto w-full min-w-0 max-w-6xl px-3 py-6 min-[400px]:px-4 sm:px-6 sm:py-8 lg:px-8 lg:py-10 2xl:max-w-7xl">
+                {children}
+              </div>
+            </main>
           </div>
-        </main>
-      </div>
+        </TrainerWorkspaceProvider>
+      </BookingsProvider>
     </div>);
 }

@@ -64,7 +64,7 @@ export function useTrainerPlan() {
 
   function canAccessRoute(href: string) {
     if (href === "/analytics") return planMeetsMinimum(plan, "pro");
-    if (href === "/ai") return planMeetsMinimum(plan, "ai_pro");
+    if (href === "/ai") return planMeetsMinimum(plan, "pro");
     return true;
   }
 

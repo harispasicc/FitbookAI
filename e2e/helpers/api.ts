@@ -163,6 +163,22 @@ export async function listClientBookings(
   return body.data;
 }
 
+export async function waitForBookingStatus(
+  request: APIRequestContext,
+  bookingId: string,
+  status: BookingDto["status"],
+  timeoutMs = 15_000,
+): Promise<BookingDto> {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const bookings = await listClientBookings(request);
+    const match = bookings.find((b) => b.id === bookingId);
+    if (match?.status === status) return match;
+    await new Promise((resolve) => setTimeout(resolve, 250));
+  }
+  throw new Error(`booking ${bookingId} did not reach status "${status}" within ${timeoutMs}ms`);
+}
+
 export async function listNotifications(
   request: APIRequestContext,
 ): Promise<ClientNotification[]> {

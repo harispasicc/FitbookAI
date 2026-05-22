@@ -25,7 +25,7 @@ export function AiHeroPanel({ className }: {
           {[0, 1, 2, 3].map((i) => (<circle key={i} cx={40 + i * 70} cy={55 + (i % 2) * 25} r={5} className="fill-orange-500/70"/>))}
         </svg>
         <p className="text-xs leading-relaxed text-muted-foreground">
-          Scheduling, reminders, and client answers — grounded in your calendar and roster.
+          Scheduling, reminders, and client answers grounded in your calendar and roster.
         </p>
       </div>
     </div>);

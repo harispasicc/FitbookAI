@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Dumbbell, Loader2, Pencil, SearchX } from "lucide-react";
+import { Dumbbell, Pencil, SearchX } from "lucide-react";
+import { LoadingPlaceholder } from "@/components/ui/busy-dots";
 import {
   apiGetClientGoals,
   apiGetClientWorkouts,
@@ -118,10 +119,7 @@ export function ClientProgressView() {
       <ClientAiAssistantPanelLazy variant="compact" />
 
       {loading ? (
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="size-4 animate-spin" aria-hidden />
-          Loading progress…
-        </div>
+        <LoadingPlaceholder minHeight="min-h-[6rem]" className="border-0 bg-transparent" />
       ) : null}
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
@@ -364,7 +362,26 @@ export function ClientProgressView() {
                 )}
               </div>
             ) : (
-              <div className="overflow-x-auto">
+              <>
+                <ul className="space-y-3 px-4 pb-4 md:hidden">
+                  {filteredWorkouts.map((w) => (
+                    <li
+                      key={w.id}
+                      className="rounded-xl border border-border/80 bg-muted/20 p-4"
+                    >
+                      <p className="text-sm font-medium text-foreground">{w.type}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">{w.date}</p>
+                      <div className="mt-2 flex flex-wrap gap-3 text-sm tabular-nums text-muted-foreground">
+                        <span>{w.durationMin} min</span>
+                        <span>{w.calories} kcal</span>
+                      </div>
+                      {w.trainerNote ? (
+                        <p className="mt-2 text-sm text-muted-foreground">{w.trainerNote}</p>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+                <div className="hidden overflow-x-auto md:block">
                 <Table>
                   <TableHeader>
                     <TableRow className="hover:bg-transparent">
@@ -392,6 +409,7 @@ export function ClientProgressView() {
                   </TableBody>
                 </Table>
               </div>
+              </>
             )}
           </CardContent>
         </Card>

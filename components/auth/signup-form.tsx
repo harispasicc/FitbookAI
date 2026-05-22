@@ -58,21 +58,11 @@ export function SignupForm({ accountKind, trainerId }: SignupFormProps) {
     }
 
     if (!isHydrated) {
-        return <AuthTransitionScreen label="Loading sign up" />;
+        return <AuthTransitionScreen />;
     }
 
     if (submitting || redirecting) {
-        return (
-            <AuthTransitionScreen
-                label={
-                    redirecting
-                        ? accountKind === "trainer"
-                            ? "Opening coach workspace"
-                            : "Opening your dashboard"
-                        : "Creating your account"
-                }
-            />
-        );
+        return <AuthTransitionScreen />;
     }
 
     if (user) {
@@ -172,10 +162,7 @@ export function SignupForm({ accountKind, trainerId }: SignupFormProps) {
             </div>
             <Button type="submit" className="w-full" disabled={submitting || redirecting}>
                 {submitting ? (
-                    <span className="inline-flex items-center justify-center gap-2">
-                        <BusyDots size="sm" className="[&_span]:bg-primary-foreground/90" />
-                        Creating account
-                    </span>
+                    <BusyDots size="sm" className="[&_span]:bg-primary-foreground/90" />
                 ) : accountKind === "trainer" ? (
                     "Create coach account"
                 ) : (

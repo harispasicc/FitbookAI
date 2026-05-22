@@ -15,7 +15,7 @@ export const mockBookings: BookingRow[] = [
     {
         id: "BK-1042",
         guest: "Alex Morgan",
-        service: "Private studio — 2h",
+        service: "Private studio (2h)",
         date: "May 14, 2026",
         status: "confirmed",
         amount: "$180",

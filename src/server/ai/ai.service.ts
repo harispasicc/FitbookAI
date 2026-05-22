@@ -134,7 +134,7 @@ export const aiService = {
     assertTrainerFeature(
       trainerProfile.plan,
       "aiAssistant",
-      "AI Assistant requires an AI Pro plan.",
+      "AI Assistant requires a Pro or AI Pro plan.",
     );
     await assertAndConsumeAiUsage(session);
 

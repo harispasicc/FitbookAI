@@ -9,6 +9,7 @@ const sizeClasses = {
 type BusyDotsProps = {
   className?: string;
   size?: keyof typeof sizeClasses;
+  /** Screen-reader only; no visible label is rendered. */
   label?: string;
 };
 

@@ -129,7 +129,7 @@ export function BookingRescheduleDialog({
       <div className="min-h-[10rem]">
         {loading ? (
           <div className="flex justify-center py-10">
-            <BusyDots label="Loading available times" />
+            <BusyDots />
           </div>
         ) : loadError ? (
           <div className="space-y-3 text-center">
@@ -150,7 +150,7 @@ export function BookingRescheduleDialog({
             compact
             icon={CalendarClock}
             title="No alternative times yet"
-            description="Your coach hasn't published more open slots. Keep your current time, or ask them to add availability — then try again."
+            description="Your coach hasn't published more open slots. Keep your current time, or ask them to add availability, then try again."
           />
         ) : (
           <div className="space-y-1.5">

@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { CalendarClock, Filter, Loader2, RefreshCw, SearchX } from "lucide-react";
+import { CalendarClock, Filter, RefreshCw, SearchX } from "lucide-react";
+import { LoadingPlaceholder } from "@/components/ui/busy-dots";
 import { useAuth } from "@/contexts/auth-context";
 import { apiGetClientCoach, type ClientCoachDto } from "@/lib/client-portal-api";
 import { BookingRowActions } from "@/components/dashboard/booking-row-actions";
@@ -71,10 +72,7 @@ export function ClientSessionsView() {
       <ClientAiAssistantPanelLazy variant="compact" />
 
       {loading ? (
-        <div className="flex min-h-[6rem] items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="size-4 animate-spin" aria-hidden />
-          Loading your sessions…
-        </div>
+        <LoadingPlaceholder minHeight="min-h-[6rem]" className="border-0 bg-transparent" />
       ) : error ? (
         <div className={productUi.errorPanel}>
           <p>{error}</p>
@@ -160,8 +158,56 @@ export function ClientSessionsView() {
                   {status !== "all" ? ` · ${status}` : ""}
                 </CardDescription>
               </CardHeader>
-              <CardContent className="px-0 sm:px-6">
-                <div className={productUi.tableShell}>
+              <CardContent className="space-y-3 px-4 pb-4 sm:px-6 sm:pb-6">
+                <ul className="space-y-3 md:hidden">
+                  {sorted.map((row) => (
+                    <li
+                      key={row.id}
+                      className="rounded-xl border border-border/80 bg-muted/20 p-4"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex min-w-0 items-center gap-2">
+                          <TrainerAvatar seed={row.guest} size="sm" />
+                          <div className="min-w-0">
+                            <p className="font-medium text-foreground">{row.guest}</p>
+                            <p className="text-sm text-muted-foreground">{row.service}</p>
+                          </div>
+                        </div>
+                        <span
+                          className={cn(
+                            "shrink-0 rounded-full px-2 py-0.5 text-xs font-medium capitalize",
+                            bookingStatusStyles(row.status),
+                          )}
+                        >
+                          {row.status}
+                        </span>
+                      </div>
+                      <dl className="mt-3 grid grid-cols-2 gap-2 text-sm">
+                        <div>
+                          <dt className="text-xs text-muted-foreground">When</dt>
+                          <dd className="font-medium text-foreground">
+                            {row.slotIso
+                              ? new Date(row.slotIso).toLocaleString(undefined, {
+                                  month: "short",
+                                  day: "numeric",
+                                  hour: "numeric",
+                                  minute: "2-digit",
+                                })
+                              : row.date}
+                          </dd>
+                        </div>
+                        <div>
+                          <dt className="text-xs text-muted-foreground">Amount</dt>
+                          <dd className="font-medium tabular-nums text-foreground">{row.amount}</dd>
+                        </div>
+                      </dl>
+                      <div className="mt-3 flex justify-end">
+                        <BookingRowActions row={row} role="client" />
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+                <div className={cn(productUi.tableShell, "hidden md:block")}>
                   <Table className={productUi.tableMinWidth}>
                     <TableHeader>
                       <TableRow className="hover:bg-transparent">

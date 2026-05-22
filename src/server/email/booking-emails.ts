@@ -57,7 +57,7 @@ export async function notifyBookingCreated(booking: BookingDto) {
 
   await sendEmail({
     to,
-    subject: `New booking request — ${booking.client.name}`,
+    subject: `New booking request: ${booking.client.name}`,
     html: `<p><strong>${booking.client.name}</strong> requested a session.</p><p>${sessionLine(booking)}</p><p><a href="${appUrl()}/calendar">Open calendar</a></p>`,
   });
 
@@ -65,7 +65,7 @@ export async function notifyBookingCreated(booking: BookingDto) {
   if (clientTo) {
     await sendEmail({
       to: clientTo,
-      subject: `Booking request sent — ${booking.trainer.fullName ?? "your coach"}`,
+      subject: `Booking request sent: ${booking.trainer.fullName ?? "your coach"}`,
       html: `<p>Your request is pending confirmation.</p><p>${sessionLine(booking)}</p><p><a href="${appUrl()}/me/sessions">View sessions</a></p>`,
     });
   }
@@ -82,7 +82,7 @@ export async function notifyBookingStatusChange(
     if (clientTo) {
       await sendEmail({
         to: clientTo,
-        subject: `Session confirmed — ${booking.trainer.fullName ?? "your coach"}`,
+        subject: `Session confirmed: ${booking.trainer.fullName ?? "your coach"}`,
         html: `<p>Your session is confirmed.</p><p>${sessionLine(booking)}</p><p><a href="${appUrl()}/me/sessions">View sessions</a></p>`,
       });
     }
@@ -91,7 +91,7 @@ export async function notifyBookingStatusChange(
       if (to) {
         await sendEmail({
           to,
-          subject: `Booking confirmed — ${booking.client.name}`,
+          subject: `Booking confirmed: ${booking.client.name}`,
           html: `<p>You confirmed a session with <strong>${booking.client.name}</strong>.</p><p>${sessionLine(booking)}</p>`,
         });
       }
@@ -113,7 +113,7 @@ export async function notifyBookingStatusChange(
     if (prefs.emailBookingCancelled && trainerTo) {
       await sendEmail({
         to: trainerTo,
-        subject: `Booking cancelled — ${booking.client.name}`,
+        subject: `Booking cancelled: ${booking.client.name}`,
         html: `<p>Session cancelled for <strong>${booking.client.name}</strong>.</p><p>${line}</p>`,
       });
     }

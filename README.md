@@ -6,12 +6,10 @@ Built as a production-oriented SaaS MVP with real persistence, authenticated wor
 
 ## Live demo
 
-**Production URL:** `add deployment url`
+**Production URL:** [https://fitbook-ai-e2gi.vercel.app/](https://fitbook-ai-e2gi.vercel.app/)
 
-Append paths to your origin:
-
-**Client (one-click)** | `/login?demo=1` → **Sign in as Marko S.** |
-**Coach (one-click)** | `/trainer/login?demo=1` → **Sign in as Amina Hadžić** |
+**Client (one-click)** | [Sign in as Marko S.](https://fitbook-ai-e2gi.vercel.app/login?demo=1) |
+**Coach (one-click)** | [Sign in as Amina Hadžić](https://fitbook-ai-e2gi.vercel.app/trainer/login?demo=1) |
 
 **Credentials**
 
@@ -23,27 +21,6 @@ Coach | `amina.trainer@fitbook.ai` | `demo1234` |
 1. Client demo → **Find coaches** → Amina → book an open slot.
 2. Coach demo → **Calendar** → confirm → mark **Completed**.
 3. Client → **Sessions** → rate the session.
-
-## Preview
-
-Add PNGs under [`docs/screenshots/`](./docs/screenshots/) before publishing the repo (avoids broken images on GitHub).
-
-```bash
-npm run dev
-# another terminal:
-npx playwright install chromium
-npm run screenshots
-```
-
-Capture `coach-dashboard.png` manually while signed in as Amina (`/dashboard` or `/calendar`). Then embed at the top of this section, for example:
-
-```markdown
-![Landing](./docs/screenshots/landing.png)
-![Client demo](./docs/screenshots/client-home.png)
-![Coaches](./docs/screenshots/booking-flow.png)
-![Coach workspace](./docs/screenshots/coach-dashboard.png)
-![Mobile](./docs/screenshots/mobile.png)
-```
 
 ## Features
 
@@ -105,16 +82,22 @@ scripts/                # Demo reset, smoke tests, screenshot capture
 docs/screenshots/       # README visuals
 ```
 
-## Local development
+## Getting started (after clone)
 
-**Requirements:** Node 20+, PostgreSQL (Neon, Supabase, or local).
+**Requirements:** Node 20+, PostgreSQL (Neon, Supabase, or local Docker).
+
+Next.js serves **frontend and API** together (`app/` + `app/api/`). There is no separate backend process.
+
+### 1. Install dependencies
 
 ```bash
 git clone <your-repo-url>
-cd saas-dashboard
+cd <your-folder>
 npm install
 cp .env.example .env
 ```
+
+### 2. Configure environment
 
 Edit `.env` — minimum:
 
@@ -124,20 +107,43 @@ JWT_SECRET="at-least-16-random-characters"
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
 ```
 
+Optional: `OPENAI_API_KEY`, `RESEND_API_KEY`, `EMAIL_FROM` (see [Environment variables](#environment-variables)).
+
+### 3. Database (schema + demo data)
+
 ```bash
-npx prisma migrate deploy
-npm run db:seed
+npm run db:generate          # Prisma client (also runs on postinstall)
+npx prisma migrate deploy    # apply migrations
+npm run db:seed              # demo users, coach, availability slots
+```
+
+### 4. Run the app
+
+```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). Demo: [http://localhost:3000/login?demo=1](http://localhost:3000/login?demo=1).
+Open [http://localhost:3000](http://localhost:3000).
 
-Refresh demo slots after heavy testing: `npm run db:reset`.
+- Client demo: [http://localhost:3000/login?demo=1](http://localhost:3000/login?demo=1)
+- Coach demo: [http://localhost:3000/trainer/login?demo=1](http://localhost:3000/trainer/login?demo=1)
 
-If TypeScript complains about missing Prisma fields:
+**Useful commands**
+
+`npm run dev` | Dev server (UI + API) |
+`npm run build` | Production build |
+`npm run start` | Run production build locally |
+`npm run lint` | ESLint |
+`npm run db:seed` | Re-seed demo data |
+`npm run db:reset` | Fresh slots, clears bookings (heavy E2E testing) |
+`npm run test:e2e` | Playwright E2E (seed DB first) |
+
+If port 3000 is stuck after a crashed dev server:
 
 ```bash
-npm run db:generate
+lsof -ti :3000 | xargs kill -9
+rm -f .next/dev/lock
+npm run dev
 ```
 
 ## Environment variables
@@ -190,7 +196,7 @@ npm run test:e2e
 3. `npm run db:seed` once for demo accounts (optional).
 4. Set `NEXT_PUBLIC_APP_URL` to the public origin.
 5. Configure Resend for password reset and booking email.
-6. **Replace `https://YOUR_DEPLOYMENT_URL` at the top of this README** with the live link.
+6. Production app: [https://fitbook-ai-e2gi.vercel.app/](https://fitbook-ai-e2gi.vercel.app/)
 
 ## Current MVP scope
 

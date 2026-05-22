@@ -1,7 +1,8 @@
 "use client";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { ClipboardList, Dumbbell, Loader2, MessageCircle, RefreshCw } from "lucide-react";
+import { ClipboardList, Dumbbell, MessageCircle, RefreshCw } from "lucide-react";
+import { BusyDots } from "@/components/ui/busy-dots";
 import {
   apiTrainerTool,
   TRAINER_TOOL_LABELS,
@@ -48,7 +49,7 @@ export function TrainerAiToolsView() {
           AI workspace
         </h1>
         <p className="text-sm text-muted-foreground">
-          Fitness copilots with structured prompts — each tool calls your server-side AI with live workspace context.
+          Fitness copilots with structured prompts. Each tool calls your server-side AI with live workspace context.
         </p>
       </div>
 
@@ -149,14 +150,7 @@ function TrainerToolCard({
             disabled={loading || !prompt.trim()}
             onClick={() => void generate()}
           >
-            {loading ? (
-              <>
-                <Loader2 className="mr-2 size-4 animate-spin" aria-hidden />
-                Generating…
-              </>
-            ) : (
-              "Generate"
-            )}
+            {loading ? <BusyDots size="sm" className="[&_span]:bg-primary-foreground/90" /> : "Generate"}
           </Button>
 
           {error ? (

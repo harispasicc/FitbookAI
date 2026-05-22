@@ -106,7 +106,9 @@ export function TrainerPlanSettingsCard() {
                     Active
                   </span>
                 ) : saving === id ? (
-                  <span className="mt-3 inline-block text-xs text-muted-foreground">Saving…</span>
+                  <span className="mt-3 inline-flex">
+                    <BusyDots size="sm" />
+                  </span>
                 ) : null}
               </button>
             );

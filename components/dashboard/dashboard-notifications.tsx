@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Bell } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
+import { useTrainerWorkspace } from "@/contexts/trainer-workspace-context";
 import { BusyDots } from "@/components/ui/busy-dots";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
@@ -38,6 +39,7 @@ function toneRing(tone: TrainerNotificationDto["tone"]) {
 
 export function DashboardNotifications() {
   const { user } = useAuth();
+  const { refreshClients } = useTrainerWorkspace();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [items, setItems] = useState<TrainerNotificationDto[]>([]);
@@ -69,8 +71,12 @@ export function DashboardNotifications() {
   }, [user, load]);
 
   useEffect(() => {
-    if (open) deferEffect(() => void load());
-  }, [open, load]);
+    if (!open) return;
+    deferEffect(() => {
+      void load();
+      void refreshClients();
+    });
+  }, [open, load, refreshClients]);
 
   const withReadState = useMemo(
     () =>

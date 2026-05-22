@@ -111,7 +111,7 @@ export function buildTrainerSearchResults(input: {
       (b): TrainerSearchItemDto => ({
         id: b.id,
         type: "booking",
-        title: `${b.client.name} — ${b.service.title}`,
+        title: `${b.client.name}: ${b.service.title}`,
         subtitle: `${formatBookingWhen(b.startsAt)} · ${b.status}`,
         href: "/calendar",
       }),

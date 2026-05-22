@@ -30,7 +30,7 @@ export function LandingPage() {
         <section className="mx-auto grid min-w-0 max-w-6xl gap-8 px-3 py-12 min-[400px]:px-4 sm:gap-12 sm:px-6 sm:py-16 lg:grid-cols-2 lg:items-center lg:gap-16 lg:py-24">
           <div className="min-w-0 space-y-5 sm:space-y-6 [&_a]:touch-manipulation">
             <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
-              For people who train
+              Book coaches · track progress
             </p>
             <h1 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl md:text-5xl">
               Find your coach, book smarter, track your progress

@@ -102,6 +102,21 @@ export function TrainerWorkspaceProvider({ children }: { children: ReactNode }) 
     return () => window.removeEventListener(BOOKINGS_UPDATE_EVENT, onUpdate);
   }, [isTrainer, refreshClients, refreshAnalytics]);
 
+  useEffect(() => {
+    if (!isTrainer) return;
+    function onVisible() {
+      if (document.visibilityState === "visible") {
+        void Promise.all([refreshClients(), refreshAnalytics()]);
+      }
+    }
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", onVisible);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", onVisible);
+    };
+  }, [isTrainer, refreshClients, refreshAnalytics]);
+
   const value = useMemo(
     () => ({
       clients,

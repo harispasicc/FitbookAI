@@ -213,7 +213,7 @@ export function ClientDetailView() {
                     <Sparkles className="size-4 text-primary" aria-hidden/>
                     AI suggestions
                   </CardTitle>
-                  <CardDescription>Generated coaching prompts — no model calls in this build.</CardDescription>
+                  <CardDescription>Generated coaching prompts. No model calls in this build.</CardDescription>
                 </CardHeader>
                 <CardContent className="grid gap-3 sm:grid-cols-2">
                   {[
@@ -247,7 +247,7 @@ export function ClientDetailView() {
                     <Camera className="size-4 text-muted-foreground" aria-hidden/>
                     Progress photos
                   </CardTitle>
-                  <CardDescription>Front / side / back — client uploads.</CardDescription>
+                  <CardDescription>Front, side, and back. Client uploads.</CardDescription>
                 </CardHeader>
                 <CardContent className="grid grid-cols-3 gap-2">
                   {[fitnessImages.stretch, fitnessImages.track, fitnessImages.dumbbells].map((src, i) => (<div key={i} className="relative aspect-[3/4] overflow-hidden rounded-lg border border-border bg-muted">
@@ -287,7 +287,7 @@ export function ClientDetailView() {
           {tab === "Notes" ? (<Card className="rounded-2xl border border-border/80 shadow-sm">
               <CardHeader>
                 <CardTitle className="text-base">Coach notes</CardTitle>
-                <CardDescription>Private CRM notes — saved to your workspace.</CardDescription>
+                <CardDescription>Private CRM notes saved to your workspace.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4 text-sm">
                 <textarea

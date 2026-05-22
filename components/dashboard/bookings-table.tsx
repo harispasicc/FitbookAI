@@ -48,7 +48,58 @@ export function BookingsTable() {
             />
           </div>
         ) : (
-          <div className={productUi.tableShell}>
+          <>
+          <ul className="space-y-3 px-4 pb-4 md:hidden">
+            {rows.map((row) => (
+              <li
+                key={row.id}
+                className="rounded-xl border border-border/80 bg-muted/20 p-4"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <TrainerAvatar seed={row.guest} size="sm" />
+                    <div className="min-w-0">
+                      <p className="font-medium text-foreground">{row.guest}</p>
+                      <p className="truncate text-sm text-muted-foreground">{row.service}</p>
+                    </div>
+                  </div>
+                  <span
+                    className={cn(
+                      "shrink-0 rounded-full px-2 py-0.5 text-xs font-medium capitalize",
+                      bookingStatusStyles(row.status),
+                    )}
+                  >
+                    {row.status}
+                  </span>
+                </div>
+                <dl className="mt-3 grid grid-cols-2 gap-2 text-sm">
+                  <div className="col-span-2">
+                    <dt className="text-xs text-muted-foreground">When</dt>
+                    <dd className="font-medium text-foreground">
+                      {row.slotIso
+                        ? new Date(row.slotIso).toLocaleString(undefined, {
+                            month: "short",
+                            day: "numeric",
+                            hour: "numeric",
+                            minute: "2-digit",
+                          })
+                        : row.date}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-xs text-muted-foreground">Amount</dt>
+                    <dd className="font-medium tabular-nums">{row.amount}</dd>
+                  </div>
+                </dl>
+                {user?.role === "trainer" ? (
+                  <div className="mt-3 flex justify-end">
+                    <BookingRowActions row={row} role="trainer" />
+                  </div>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+          <div className={cn(productUi.tableShell, "hidden md:block")}>
           <Table className="min-w-[40rem]">
             <TableHeader>
               <TableRow className="hover:bg-transparent">
@@ -109,6 +160,7 @@ export function BookingsTable() {
             </TableBody>
           </Table>
           </div>
+          </>
         )}
       </CardContent>
     </Card>

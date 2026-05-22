@@ -18,7 +18,7 @@ export function CalendarPageContent() {
         <p className="text-sm text-muted-foreground">
           {hasAdvancedCalendar
             ? "Weekly agenda, session statuses, and live bookings."
-            : "Session list and statuses — upgrade for the week grid view."}
+            : "Session list and statuses. Upgrade for the week grid view."}
         </p>
       </div>
 

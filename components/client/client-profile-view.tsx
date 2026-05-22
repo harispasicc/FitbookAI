@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { Check, Globe, Loader2, MapPin, Phone, Sparkles, User } from "lucide-react";
+import { Check, Globe, MapPin, Phone, Sparkles, User } from "lucide-react";
+import { BusyDots, LoadingPlaceholder } from "@/components/ui/busy-dots";
 import { useAuth } from "@/contexts/auth-context";
 import {
   apiGetClientProfile,
@@ -112,12 +113,7 @@ export function ClientProfileView() {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Loader2 className="size-4 animate-spin" aria-hidden />
-        Loading profile…
-      </div>
-    );
+    return <LoadingPlaceholder minHeight="min-h-[12rem]" />;
   }
 
   return (
@@ -249,14 +245,7 @@ export function ClientProfileView() {
               <Separator />
               <div className="flex flex-wrap items-center gap-3">
                 <Button type="button" className="rounded-xl" onClick={() => void onSave()} disabled={saving}>
-                  {saving ? (
-                    <>
-                      <Loader2 className="mr-1 size-4 animate-spin" aria-hidden />
-                      Saving…
-                    </>
-                  ) : (
-                    "Save changes"
-                  )}
+                  {saving ? <BusyDots size="sm" className="[&_span]:bg-primary-foreground/90" /> : "Save changes"}
                 </Button>
                 {saved ? (
                   <span className="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-700">

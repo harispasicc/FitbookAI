@@ -115,21 +115,11 @@ export function LoginForm({
     }
     if (!isHydrated) {
         return (
-          <AuthTransitionScreen label="Loading sign in" />
+          <AuthTransitionScreen />
         );
     }
     if (submitting || redirecting) {
-        return (
-          <AuthTransitionScreen
-            label={
-              redirecting
-                ? isTrainerPortal
-                  ? "Opening coach workspace"
-                  : "Opening your dashboard"
-                : "Signing in"
-            }
-          />
-        );
+        return <AuthTransitionScreen />;
     }
     if (user) {
         return (<div className="space-y-4 rounded-lg border border-border bg-muted/30 p-4 text-sm">
@@ -228,10 +218,7 @@ export function LoginForm({
       </div>
       <Button type="submit" className="w-full" disabled={submitting || redirecting}>
         {submitting ? (
-          <span className="inline-flex items-center justify-center gap-2">
-            <BusyDots size="sm" className="[&_span]:bg-primary-foreground/90" />
-            Signing in
-          </span>
+          <BusyDots size="sm" className="[&_span]:bg-primary-foreground/90" />
         ) : isTrainerPortal ? (
           "Coach sign in"
         ) : (

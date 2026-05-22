@@ -6,7 +6,7 @@ export function BodyProgressCard({ className }: {
     return (<Card className={cn("overflow-hidden rounded-2xl border border-border/80 bg-gradient-to-br from-card via-card to-orange-50/30 shadow-sm", className)}>
       <CardHeader className="pb-2">
         <CardTitle className="text-base">Client progress</CardTitle>
-        <CardDescription>12-week cut — illustrative progress</CardDescription>
+        <CardDescription>12-week cut (illustrative progress)</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">

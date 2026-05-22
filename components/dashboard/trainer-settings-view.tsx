@@ -317,7 +317,7 @@ export function TrainerSettingsView() {
                 Profile
               </CardTitle>
               <CardDescription>
-                Shown on Find coaches — name, specialty, bio, and experience.
+                Shown on Find coaches: name, specialty, bio, and experience.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 pt-5">

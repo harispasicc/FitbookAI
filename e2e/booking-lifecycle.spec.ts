@@ -1,6 +1,7 @@
 import { test, expect, freshClientApi, freshTrainerApi } from "./fixtures";
 import {
   createBooking,
+  DEMO_CLIENT,
   DEMO_COACH_PROFILE_NAME,
   findBookableSlot,
   findDemoCoachId,
@@ -69,7 +70,21 @@ test.describe("Booking lifecycle", () => {
       await expect(rateButton).toHaveCount(0);
 
       await trainerPage.goto("/calendar");
-      await expect(trainerPage.getByText(/completed/i).first()).toBeVisible();
+      const trainerSessionWhen = await trainerPage.evaluate((iso) => {
+        return new Date(iso).toLocaleString(undefined, {
+          month: "short",
+          day: "numeric",
+          hour: "numeric",
+          minute: "2-digit",
+        });
+      }, booking.startsAt);
+      const trainerRow = trainerPage
+        .getByRole("row")
+        .filter({ hasText: booking.service.title })
+        .filter({ hasText: DEMO_CLIENT.label })
+        .filter({ hasText: trainerSessionWhen });
+      await expect(trainerRow).toHaveCount(1);
+      await expect(trainerRow).toContainText(/completed/i);
     } finally {
       await clientApi.dispose();
       await trainerApi.dispose();

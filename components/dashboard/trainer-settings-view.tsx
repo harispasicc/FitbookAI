@@ -562,7 +562,7 @@ export function TrainerSettingsView() {
                 Notifications
               </CardTitle>
               <CardDescription>
-                Email alerts for bookings (requires RESEND_API_KEY on the server).
+                Choose which booking events should send email alerts to your inbox.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">

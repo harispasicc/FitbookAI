@@ -126,12 +126,27 @@ export function buildDemoState(now = new Date()): DemoState {
             clientEmail: "",
         };
     });
+    const nonCancelled = bookings.filter((b) => b.status !== "cancelled");
+    const revenue30d = bookings
+        .filter((b) => b.status === "confirmed")
+        .reduce((sum, b) => {
+        const digits = b.amount.replace(/[^\d]/g, "");
+        return sum + (digits ? Number(digits) : 0);
+    }, 0);
+    const guestBookingCounts = new Map<string, number>();
+    for (const b of nonCancelled) {
+        guestBookingCounts.set(b.guest, (guestBookingCounts.get(b.guest) ?? 0) + 1);
+    }
+    const uniqueGuests = guestBookingCounts.size;
+    const returningGuests = [...guestBookingCounts.values()].filter((n) => n >= 2).length;
+    const retentionPct =
+        uniqueGuests === 0 ? 0 : Math.round((returningGuests / uniqueGuests) * 100);
     const analytics = {
-        revenue30d: 12480,
-        bookingsCount: 186,
-        activeClients: clients.length,
-        retentionPct: 88,
-        aiRemindersGenerated: 214,
+        revenue30d,
+        bookingsCount: nonCancelled.length,
+        activeClients: clients.filter((c) => c.status === "active").length,
+        retentionPct,
+        aiRemindersGenerated: 12,
     };
     return {
         version: 1,

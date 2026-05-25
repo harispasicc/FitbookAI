@@ -8,6 +8,7 @@ import { LandingPlatformSection } from "@/components/site/landing-platform-secti
 import { LandingTestimonials } from "@/components/site/landing-testimonials";
 import { SiteFooter } from "@/components/site/site-footer";
 import { fitnessImages, trainerAvatarUrls } from "@/lib/media-urls";
+import { landingSocialProofStats } from "@/lib/landing-preview-metrics";
 import { GUEST_NAV_LINKS } from "@/lib/site-nav";
 const features = [
     { title: "Smart booking", desc: "Availability-aware scheduling without spreadsheet chaos.", icon: CalendarDays },
@@ -80,16 +81,19 @@ export function LandingPage() {
           />
         </section>
 
-        <section className="border-y border-border/80 bg-muted/30 py-10 sm:py-12">
-          <div className="mx-auto grid min-w-0 max-w-6xl gap-6 px-3 min-[400px]:px-4 sm:grid-cols-3 sm:gap-8 sm:px-6">
-            {[
-            { k: "500+", v: "Bookings managed" },
-            { k: "50+", v: "Studios & coaches" },
-            { k: "10k+", v: "Sessions booked" },
-        ].map((s) => (<div key={s.k} className="text-center">
-                <p className="text-3xl font-semibold tabular-nums tracking-tight">{s.k}</p>
-                <p className="mt-1 text-sm text-muted-foreground">{s.v}</p>
-              </div>))}
+        <section className="border-y border-border/80 bg-muted/25 py-10 sm:py-12">
+          <div className="mx-auto min-w-0 max-w-6xl space-y-3 px-3 min-[400px]:px-4 sm:px-6">
+            <p className="text-center text-[11px] font-medium text-muted-foreground/90">
+              Illustrative benchmarks from demo workspaces — not live platform totals
+            </p>
+            <div className="grid gap-6 sm:grid-cols-3 sm:gap-8">
+              {landingSocialProofStats.map((s) => (
+                <div key={s.label} className="text-center">
+                  <p className="text-3xl font-semibold tabular-nums tracking-tight">{s.value}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">{s.label}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 

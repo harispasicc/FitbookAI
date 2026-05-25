@@ -27,6 +27,7 @@ import {
   markSessionExpired,
 } from "@/lib/auth-session-events";
 import { authUsersEqual } from "@/lib/auth-user-equals";
+import { markJustSignedUp } from "@/lib/first-visit-welcome";
 
 const CLIENT_TRAINER_PREF_KEY = "saas-dashboard-client-trainer";
 
@@ -319,6 +320,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       clearSessionExpiredFlag();
       const next = mapApiUser(result.user, tid);
+      markJustSignedUp(next.id);
       setUser(next);
       return { ok: true, user: next };
     },

@@ -212,6 +212,12 @@ export type TrainerClientDto = {
   status: "active" | "paused" | "trial";
 };
 
+export type KpiTrendDto = {
+  label: string;
+  direction: "up" | "down" | "neutral";
+  show: boolean;
+};
+
 export type TrainerAnalyticsDto = {
   bookingsCount: number;
   revenue30dCents: number;
@@ -223,7 +229,89 @@ export type TrainerAnalyticsDto = {
   bookingsByWeekday: number[];
   bookingsTrend: number[];
   clientLoad: { active: number; paused: number; trial: number };
-  recentActivity: { id: string; label: string; time: string }[];
+  recentActivity: {
+    id: string;
+    type: "booked" | "confirmed" | "completed" | "cancelled" | "review" | "goal" | "ai";
+    title: string;
+    subtitle: string;
+    time: string;
+    clientName: string;
+  }[];
+  today: {
+    upcomingSessions: {
+      id: string;
+      clientName: string;
+      service: string;
+      startsAt: string;
+      status: string;
+      timeLabel: string;
+    }[];
+    pendingConfirmations: number;
+    followUpClients: { id: string; name: string; reason: string }[];
+    nextSession: {
+      id: string;
+      clientName: string;
+      service: string;
+      startsAt: string;
+      minutesUntil: number;
+      timeLabel: string;
+    } | null;
+  };
+  kpiTrends: {
+    revenue: KpiTrendDto;
+    bookings: KpiTrendDto;
+    activeClients: KpiTrendDto;
+    retention: KpiTrendDto;
+    aiInsights: KpiTrendDto;
+  };
+  growth: {
+    revenueTrend: number[];
+    sessionsCompletedPerWeek: number[];
+    clientGrowthPerWeek: number[];
+    bookingConversionPct: number;
+    peakWeekdays: number[];
+    peakHours: { label: string; count: number }[];
+    chartRevenueTrend: number[];
+    chartSessionsCompleted: number[];
+    chartClientGrowth: number[];
+    chartPeakWeekdays: number[];
+    usesHistoricalSeed: boolean;
+  };
+  intelligence: {
+    headline: string;
+    recommendations: {
+      id: string;
+      title: string;
+      detail: string;
+      href: string;
+      tone: "warning" | "success" | "neutral";
+    }[];
+  };
+  clientInsights: {
+    mostActive: { id: string; name: string; meta: string; value: string }[];
+    inactive: { id: string; name: string; meta: string; value: string }[];
+    churnRisk: { id: string; name: string; meta: string; value: string }[];
+    avgSessionsPerClient: number;
+    returningClientPct: number;
+    sessionStreaks: { clientName: string; streak: number }[];
+  };
+  smartInsights: string[];
+  emptyHints: {
+    retention: string | null;
+    revenueTrend: string | null;
+    conversion: string | null;
+  };
+  highlights: {
+    bestService: string | null;
+    bestServiceBookings: number;
+    peakDayName: string | null;
+    peakDaySharePct: number;
+    peakHourLabel: string | null;
+    peakHourSharePct: number;
+    revenueVsPriorPeriodPct: number | null;
+    bestWeekRevenueEur: number;
+    completedSessions30d: number;
+  };
 };
 
 export async function apiListTrainerClients(): Promise<TrainerClientDto[]> {

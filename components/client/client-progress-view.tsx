@@ -29,6 +29,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { deferEffect } from "@/lib/defer-effect";
 import { productUi, productPageHeader } from "@/lib/product-ui";
+import { clientCard } from "@/lib/client-surfaces";
 import { cn } from "@/lib/utils";
 
 const goalMeta: {
@@ -150,10 +151,10 @@ export function ClientProgressView() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.04 }}
                 className={cn(
-                  "cursor-pointer touch-manipulation rounded-2xl border p-4 text-left shadow-sm outline-none transition-all hover:border-primary/35 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                  "cursor-pointer touch-manipulation rounded-2xl border-0 p-4 text-left shadow-sm outline-none transition-all hover:-translate-y-0.5 hover:shadow-md focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                   selected
-                    ? "border-primary bg-primary/5 ring-1 ring-primary/15"
-                    : "border-border bg-card",
+                    ? "bg-gradient-to-br from-teal-500/10 to-violet-500/8 ring-2 ring-teal-500/20 shadow-md"
+                    : "bg-card shadow-sm",
                 )}
                 onClick={() => void persist({ ...goals, active: g.key })}
                 onKeyDown={(e) => {
@@ -206,7 +207,7 @@ export function ClientProgressView() {
           })}
         </div>
         {edit ? (
-          <Card className="rounded-2xl border border-border/80">
+          <Card className={clientCard.panel}>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm">Edit goal</CardTitle>
               <CardDescription>
@@ -288,7 +289,7 @@ export function ClientProgressView() {
             </CardContent>
           </Card>
         ) : null}
-        <Card className="rounded-2xl border border-primary/20 bg-primary/[0.03]">
+        <Card className={clientCard.panelAccent}>
           <CardContent className="flex flex-col gap-2 p-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
@@ -367,7 +368,7 @@ export function ClientProgressView() {
                   {filteredWorkouts.map((w) => (
                     <li
                       key={w.id}
-                      className="rounded-xl border border-border/80 bg-muted/20 p-4"
+                      className={cn(clientCard.listItem, "p-4")}
                     >
                       <p className="text-sm font-medium text-foreground">{w.type}</p>
                       <p className="mt-1 text-xs text-muted-foreground">{w.date}</p>

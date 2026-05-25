@@ -12,7 +12,7 @@ export const ClientAiAssistantPanelLazy = dynamic(
     ssr: false,
     loading: () => (
       <LoadingPlaceholder
-        className="rounded-2xl border border-border/80 bg-card"
+        className="rounded-2xl border-0 bg-gradient-to-br from-violet-500/[0.06] to-teal-500/[0.04] shadow-sm"
         minHeight="min-h-[10rem]"
       />
     ),

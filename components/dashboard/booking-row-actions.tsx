@@ -11,14 +11,17 @@ import {
 } from "@/lib/bookings-api";
 import { notifyBookingsUpdated } from "@/lib/demo-data-events";
 import type { BookingRow } from "@/lib/mock-bookings";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
 export function BookingRowActions({
   row,
   role,
+  layout = "default",
 }: {
   row: BookingRow;
   role: "client" | "trainer";
+  layout?: "default" | "compact";
 }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -123,8 +126,12 @@ export function BookingRowActions({
 
   if (actions.length === 0) return null;
 
+  const compact = layout === "compact";
+
   return (
-    <div className="flex flex-col items-end gap-1">
+    <div
+      className={compact ? "flex flex-wrap items-center gap-1" : "flex flex-col items-end gap-1"}
+    >
       {row.trainerId && rescheduleOpen ? (
         <BookingRescheduleDialog
           bookingId={row.id}
@@ -145,14 +152,23 @@ export function BookingRowActions({
           onClose={() => setRescheduleOpen(false)}
         />
       ) : null}
-      <div className="flex flex-wrap justify-end gap-1">
+      <div
+        className={cn(
+          "flex flex-wrap gap-1",
+          compact ? "items-center" : "justify-end",
+        )}
+      >
         {actions.map((a) => (
           <Button
             key={a.label}
             type="button"
             size="sm"
             variant={a.variant ?? "default"}
-            className="h-9 min-h-9 px-3 text-xs sm:h-7 sm:min-h-7 sm:px-2"
+            className={
+              compact
+                ? "h-7 min-h-7 px-2 text-[10px]"
+                : "h-9 min-h-9 px-3 text-xs sm:h-7 sm:min-h-7 sm:px-2"
+            }
             disabled={busy}
             onClick={a.onClick}
           >

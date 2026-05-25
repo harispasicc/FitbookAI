@@ -6,9 +6,7 @@ export function markSessionExpired() {
   if (typeof window === "undefined") return;
   try {
     sessionStorage.setItem(SESSION_EXPIRED_STORAGE_KEY, "1");
-  } catch {
-    /* ignore */
-  }
+  } catch {}
 }
 
 export function consumeSessionExpiredFlag(): boolean {
@@ -19,9 +17,7 @@ export function consumeSessionExpiredFlag(): boolean {
       sessionStorage.removeItem(SESSION_EXPIRED_STORAGE_KEY);
       return true;
     }
-  } catch {
-    /* ignore */
-  }
+  } catch {}
   return false;
 }
 
@@ -29,18 +25,14 @@ export function clearSessionExpiredFlag() {
   if (typeof window === "undefined") return;
   try {
     sessionStorage.removeItem(SESSION_EXPIRED_STORAGE_KEY);
-  } catch {
-    /* ignore */
-  }
+  } catch {}
 }
 
 export function markPostLogoutRedirect() {
   if (typeof window === "undefined") return;
   try {
     sessionStorage.setItem(POST_LOGOUT_REDIRECT_KEY, "1");
-  } catch {
-    /* ignore */
-  }
+  } catch {}
 }
 
 export function consumePostLogoutRedirect(): boolean {
@@ -51,9 +43,7 @@ export function consumePostLogoutRedirect(): boolean {
       sessionStorage.removeItem(POST_LOGOUT_REDIRECT_KEY);
       return true;
     }
-  } catch {
-    /* ignore */
-  }
+  } catch {}
   return false;
 }
 

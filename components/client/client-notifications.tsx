@@ -163,6 +163,7 @@ export function ClientNotifications() {
             <EmptyState
               inline
               compact
+              className="w-full"
               icon={Bell}
               title="No notifications yet"
               description="Reminders and coach updates will appear here."

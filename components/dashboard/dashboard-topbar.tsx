@@ -33,19 +33,20 @@ export function DashboardTopBar({ onMenuClick, showBrandInNavbar, }: {
 
       {showBrandInNavbar ? (<BrandLogoLink href="/dashboard" size="nav" className="min-w-0 max-w-[min(100%,200px)] shrink-0 [&_.brand-logo-mark]:text-base sm:[&_.brand-logo-mark]:text-lg lg:[&_.brand-logo-mark]:text-lg"/>) : null}
 
-      <DashboardSearch />
+      <div className="ml-auto flex min-w-0 items-center gap-1.5 sm:gap-2 md:gap-3">
+        <DashboardSearch />
 
-      <DashboardNotifications />
+        <DashboardNotifications />
 
-      <Button asChild size="icon" variant="ghost" className="shrink-0 touch-manipulation sm:hidden" title="Calendar">
-        <Link href="/calendar" aria-label="Calendar">
-          <CalendarPlus className="size-5 text-muted-foreground"/>
-        </Link>
-      </Button>
+        <Button asChild size="icon" variant="ghost" className="shrink-0 touch-manipulation sm:hidden" title="Calendar">
+          <Link href="/calendar" aria-label="Calendar">
+            <CalendarPlus className="size-5 text-muted-foreground"/>
+          </Link>
+        </Button>
 
-      <Button asChild size="sm" variant="outline" className="hidden shrink-0 rounded-lg sm:inline-flex">
-        <Link href="/calendar">Calendar</Link>
-      </Button>
+        <Button asChild size="sm" variant="outline" className="hidden shrink-0 rounded-lg sm:inline-flex">
+          <Link href="/calendar">Calendar</Link>
+        </Button>
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -79,5 +80,6 @@ export function DashboardTopBar({ onMenuClick, showBrandInNavbar, }: {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+      </div>
     </header>);
 }

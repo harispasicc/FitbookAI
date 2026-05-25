@@ -1,33 +1,32 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
 import { Check, Globe, MapPin, Phone, Sparkles, User } from "lucide-react";
 import { BusyDots, LoadingPlaceholder } from "@/components/ui/busy-dots";
+import {
+  ProfileFormCard,
+  ProfileHeroBanner,
+  ProfileMainCard,
+  ProfilePageGrid,
+  ProfilePageHeader,
+  ProfileQuickLinks,
+} from "@/components/dashboard/profile-page-shell";
 import { useAuth } from "@/contexts/auth-context";
 import {
   apiGetClientProfile,
   apiPatchClientProfile,
   profileDtoToExtension,
 } from "@/lib/client-portal-api";
-import { defaultClientProfileExtension, type ClientProfileExtension } from "@/lib/client-profile-extension";
+import {
+  defaultClientProfileExtension,
+  type ClientProfileExtension,
+} from "@/lib/client-profile-extension";
 import { notifyClientPortalUpdated } from "@/lib/demo-data-events";
 import { deferEffect } from "@/lib/defer-effect";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-
-function initials(name: string) {
-  return name
-    .split(/\s+/)
-    .map((p) => p[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-}
 
 const timezones = [
   "Europe/Sarajevo",
@@ -38,6 +37,14 @@ const timezones = [
   "America/New_York",
   "America/Los_Angeles",
   "UTC",
+];
+
+const CLIENT_LINKS = [
+  { href: "/me", label: "Home" },
+  { href: "/me/sessions", label: "Sessions" },
+  { href: "/me/progress", label: "Progress" },
+  { href: "/coaches", label: "Find coaches" },
+  { href: "/me/ai", label: "FitBook AI" },
 ];
 
 export function ClientProfileView() {
@@ -118,37 +125,24 @@ export function ClientProfileView() {
 
   return (
     <div className="min-w-0 space-y-8 sm:space-y-10">
-      <div className="min-w-0 space-y-1">
-        <h1 className="text-balance text-xl font-semibold tracking-tight min-[400px]:text-2xl">
-          Profile
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          How you appear in the workspace and what your coach may see in session notes and messaging.
-        </p>
-      </div>
+      <ProfilePageHeader
+        title="Profile"
+        accent="client"
+        description="How you appear in the workspace and what your coach may see in session notes and messaging."
+      />
 
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
-      <div className="grid min-w-0 gap-6 lg:grid-cols-[1fr_17rem] lg:items-start lg:gap-8">
+      <ProfilePageGrid>
         <div className="min-w-0 space-y-6">
-          <Card className="overflow-hidden rounded-2xl border border-border/80 shadow-sm">
-            <CardHeader className="border-b border-border/60 bg-muted/20 pb-6">
-              <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-                <Avatar className="size-20 border border-border bg-card shadow-sm sm:size-24">
-                  <AvatarFallback className="text-lg font-semibold sm:text-xl">
-                    {initials(displayName || user.name)}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="min-w-0 flex-1 space-y-1">
-                  <p className="text-lg font-semibold text-foreground">{displayName || user.name}</p>
-                  <p className="text-sm text-muted-foreground">{user.email}</p>
-                  <span className="inline-flex w-fit rounded-full border border-border bg-background px-2.5 py-0.5 text-xs font-medium capitalize text-foreground">
-                    {user.role}
-                  </span>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-6 pt-6">
+          <ProfileMainCard>
+            <ProfileHeroBanner
+              displayName={displayName || user.name}
+              email={user.email}
+              roleLabel={user.role}
+              accent="client"
+            />
+            <ProfileFormCard>
               <div className="grid min-w-0 gap-4 sm:grid-cols-2">
                 <div className="space-y-2 sm:col-span-2">
                   <Label htmlFor="client-display-name" className="flex items-center gap-2">
@@ -244,8 +238,17 @@ export function ClientProfileView() {
               </div>
               <Separator />
               <div className="flex flex-wrap items-center gap-3">
-                <Button type="button" className="rounded-xl" onClick={() => void onSave()} disabled={saving}>
-                  {saving ? <BusyDots size="sm" className="[&_span]:bg-primary-foreground/90" /> : "Save changes"}
+                <Button
+                  type="button"
+                  className="rounded-xl"
+                  onClick={() => void onSave()}
+                  disabled={saving}
+                >
+                  {saving ? (
+                    <BusyDots size="sm" className="[&_span]:bg-primary-foreground/90" />
+                  ) : (
+                    "Save changes"
+                  )}
                 </Button>
                 {saved ? (
                   <span className="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-700">
@@ -254,36 +257,12 @@ export function ClientProfileView() {
                   </span>
                 ) : null}
               </div>
-            </CardContent>
-          </Card>
+            </ProfileFormCard>
+          </ProfileMainCard>
         </div>
 
-        <aside className="min-w-0 space-y-4">
-          <Card className="rounded-2xl border border-border/80 shadow-sm">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-semibold">Quick links</CardTitle>
-              <CardDescription>Workspace shortcuts</CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-1 text-sm">
-              <Button variant="ghost" size="sm" className="justify-start rounded-lg font-normal" asChild>
-                <Link href="/me">Home</Link>
-              </Button>
-              <Button variant="ghost" size="sm" className="justify-start rounded-lg font-normal" asChild>
-                <Link href="/me/sessions">Sessions</Link>
-              </Button>
-              <Button variant="ghost" size="sm" className="justify-start rounded-lg font-normal" asChild>
-                <Link href="/me/progress">Progress</Link>
-              </Button>
-              <Button variant="ghost" size="sm" className="justify-start rounded-lg font-normal" asChild>
-                <Link href="/coaches">Find coaches</Link>
-              </Button>
-              <Button variant="ghost" size="sm" className="justify-start rounded-lg font-normal" asChild>
-                <Link href="/me/ai">FitBook AI</Link>
-              </Button>
-            </CardContent>
-          </Card>
-        </aside>
-      </div>
+        <ProfileQuickLinks links={CLIENT_LINKS} />
+      </ProfilePageGrid>
     </div>
   );
 }

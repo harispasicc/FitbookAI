@@ -158,6 +158,7 @@ export function DashboardNotifications() {
             <EmptyState
               inline
               compact
+              className="w-full"
               icon={Bell}
               title="No notifications yet"
               description="New bookings and session updates will appear here."

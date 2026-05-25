@@ -21,6 +21,7 @@ import {
 import type { BookingRow } from "@/lib/mock-bookings";
 import { deferEffect } from "@/lib/defer-effect";
 import { productUi, productPageHeader } from "@/lib/product-ui";
+import { clientCard } from "@/lib/client-surfaces";
 import { cn } from "@/lib/utils";
 
 export function ClientSessionsView() {
@@ -147,7 +148,7 @@ export function ClientSessionsView() {
               </Button>
             </EmptyState>
           ) : (
-            <Card>
+            <Card className={clientCard.panel}>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
                   <CalendarClock className="size-4 text-primary" aria-hidden />
@@ -163,7 +164,7 @@ export function ClientSessionsView() {
                   {sorted.map((row) => (
                     <li
                       key={row.id}
-                      className="rounded-xl border border-border/80 bg-muted/20 p-4"
+                      className={cn(clientCard.listItem, "p-4")}
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex min-w-0 items-center gap-2">

@@ -36,7 +36,7 @@ export function EmptyState({
     >
       <div
         className={cn(
-          "rounded-full bg-muted/50",
+          "flex shrink-0 items-center justify-center rounded-full bg-muted/50",
           compact ? "size-9" : "size-11",
         )}
       >

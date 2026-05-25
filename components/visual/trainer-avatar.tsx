@@ -13,10 +13,17 @@ function initials(name: string) {
 export function TrainerAvatar({ seed, className, size = "md", }: {
     seed: string;
     className?: string;
-    size?: "sm" | "md" | "lg";
+    size?: "sm" | "md" | "lg" | "xl";
 }) {
     const url = faceUrlForSeed(seed);
-    const sz = size === "sm" ? "size-8" : size === "lg" ? "size-12" : "size-9";
+    const sz =
+        size === "sm"
+            ? "size-8"
+            : size === "lg"
+              ? "size-12"
+              : size === "xl"
+                ? "size-14"
+                : "size-9";
     return (<Avatar className={cn(sz, "ring-2 ring-background shadow-sm", className)}>
       <AvatarImage src={url} alt=""/>
       <AvatarFallback className="text-[10px]">{initials(seed)}</AvatarFallback>

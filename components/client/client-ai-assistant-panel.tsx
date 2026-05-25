@@ -15,6 +15,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getUtcDateKey } from "@/lib/ai-constants";
 import { deferEffect } from "@/lib/defer-effect";
+import { clientCard } from "@/lib/client-surfaces";
+import { dashMutedSm } from "@/lib/dashboard-typography";
 import { cn } from "@/lib/utils";
 
 const AI_HISTORY_MAX = 18;
@@ -96,9 +98,7 @@ function AiChatPanelBody({
         if (stored === getUtcDateKey()) {
           setDailyLimitReached(true);
         }
-      } catch {
-        /* ignore */
-      }
+      } catch {}
     });
   }, [userId]);
 
@@ -148,9 +148,7 @@ function AiChatPanelBody({
             setError(null);
             try {
               sessionStorage.setItem(aiLimitStorageKey(userId), getUtcDateKey());
-            } catch {
-              /* ignore */
-            }
+            } catch {}
             return;
           }
           setError(result.message);
@@ -180,23 +178,27 @@ function AiChatPanelBody({
   return (
     <Card
       className={cn(
-        "overflow-hidden rounded-2xl border border-border/80 bg-card shadow-sm",
-        compact ? "border-primary/15" : "border-primary/20 shadow-md shadow-primary/5",
+        clientCard.panelAccent,
+        "overflow-hidden",
+        compact && "shadow-sm",
         className,
       )}
     >
       <CardHeader
-        className={cn("border-b border-border/60 bg-muted/20", compact ? "py-3" : "py-4")}
+        className={cn(
+          "border-0 bg-gradient-to-r from-violet-500/[0.06] to-teal-500/[0.04]",
+          compact ? "py-3" : "py-4",
+        )}
       >
         <CardTitle
-          className={cn("flex items-center gap-2", compact ? "text-sm" : "text-base")}
+          className={cn("flex items-center gap-2 font-bold", compact ? "text-sm" : "text-base")}
         >
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-violet-500/12 text-violet-700 shadow-sm">
             <Sparkles className="size-4" aria-hidden />
           </span>
           FitBook AI
         </CardTitle>
-        <CardDescription className={cn(compact && "text-xs")}>
+        <CardDescription className={cn(dashMutedSm, compact && "text-xs")}>
           Booking hints, progress nudges, and questions about your plan. Powered by FitBook AI.
         </CardDescription>
       </CardHeader>
@@ -208,7 +210,7 @@ function AiChatPanelBody({
         <div
           ref={chatScrollRef}
           className={cn(
-            "space-y-3 overflow-y-auto rounded-xl border border-border/60 bg-muted/15 p-3",
+            "space-y-3 overflow-y-auto rounded-xl border-0 bg-muted/25 p-3 shadow-inner",
             compact ? "max-h-52" : "max-h-80",
           )}
           role="log"
@@ -231,7 +233,7 @@ function AiChatPanelBody({
                     "max-w-[92%] rounded-2xl px-3 py-2 text-sm leading-relaxed shadow-sm",
                     msg.role === "user"
                       ? "bg-primary text-primary-foreground"
-                      : "border border-border/80 bg-card text-foreground",
+                      : "border-0 bg-white/90 text-foreground shadow-sm",
                   )}
                 >
                   {msg.role === "assistant" ? (
@@ -247,7 +249,7 @@ function AiChatPanelBody({
           </AnimatePresence>
           {loading ? (
             <div className="flex justify-start">
-              <motion.div className="rounded-2xl border border-border/80 bg-card px-3 py-2">
+              <motion.div className="rounded-2xl border-0 bg-white/90 px-3 py-2 shadow-sm">
                 <BusyDots size="sm" />
               </motion.div>
             </div>
@@ -341,7 +343,7 @@ export function ClientAiAssistantPanel({
     return (
       <Card
         className={cn(
-          "flex min-h-32 items-center justify-center rounded-2xl border border-border/80 bg-card",
+          "flex min-h-32 items-center justify-center rounded-2xl border-0 bg-card shadow-sm",
           className,
         )}
       >
@@ -354,14 +356,19 @@ export function ClientAiAssistantPanel({
     return (
       <Card
         className={cn(
-          "overflow-hidden rounded-2xl border border-border/80 bg-card shadow-sm",
-          compact ? "border-primary/15" : "border-primary/20",
+          clientCard.panelAccent,
+          "overflow-hidden",
           className,
         )}
       >
-        <CardHeader className={cn("border-b border-border/60 bg-muted/20", compact ? "py-3" : "py-4")}>
-          <CardTitle className={cn("flex items-center gap-2", compact ? "text-sm" : "text-base")}>
-            <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+        <CardHeader
+          className={cn(
+            "border-0 bg-gradient-to-r from-violet-500/[0.06] to-teal-500/[0.04]",
+            compact ? "py-3" : "py-4",
+          )}
+        >
+          <CardTitle className={cn("flex items-center gap-2 font-bold", compact ? "text-sm" : "text-base")}>
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-violet-500/12 text-violet-700">
               <Sparkles className="size-4" aria-hidden />
             </span>
             FitBook AI

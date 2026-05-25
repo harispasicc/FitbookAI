@@ -4,12 +4,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { ArrowLeft, CalendarDays, Camera, LineChart, Sparkles, Target, UtensilsCrossed, } from "lucide-react";
+import { ArrowLeft, Camera, LineChart, Sparkles, Target, UtensilsCrossed, } from "lucide-react";
 import { BusyDots } from "@/components/ui/busy-dots";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { TrainerAvatar } from "@/components/visual/trainer-avatar";
+import { CrmClientHero } from "@/components/dashboard/crm-client-hero";
+import { ProfileQuickLinks } from "@/components/dashboard/profile-page-shell";
 import { BOOKINGS_UPDATE_EVENT } from "@/lib/demo-data-events";
 import { fitnessImages } from "@/lib/media-urls";
 import { bookingDtoToRow } from "@/lib/map-booking-to-row";
@@ -19,7 +20,6 @@ import {
   type TrainerClientDto,
 } from "@/lib/trainer-portal-api";
 import type { BookingRow } from "@/lib/mock-bookings";
-import { clientStatusBadgeMarkup } from "@/lib/client-status-styles";
 const tabs = ["Overview", "Sessions", "Notes"] as const;
 type Tab = (typeof tabs)[number];
 export function ClientDetailView() {
@@ -128,33 +128,7 @@ export function ClientDetailView() {
 
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex min-w-0 flex-1 flex-col gap-6">
-          <Card className="rounded-2xl border border-border/80 bg-card/90 shadow-sm">
-            <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex min-w-0 items-center gap-4">
-                <TrainerAvatar seed={client.name} size="lg"/>
-                <div className="min-w-0">
-                  <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">{client.name}</h1>
-                  <p className="text-sm text-muted-foreground">{client.goal} · {client.sessions} sessions logged</p>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    <span className={clientStatusBadgeMarkup(client.status)}>
-                      {client.status}
-                    </span>
-                    <span className="inline-flex rounded-full border border-border bg-muted/40 px-2 py-0.5 text-xs font-medium text-foreground">
-                      Next: {client.nextSession}
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className="flex shrink-0 flex-wrap gap-2">
-                <Button asChild size="sm" className="gap-2">
-                  <Link href="/calendar">
-                    <CalendarDays className="size-4" aria-hidden />
-                    View calendar
-                  </Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <CrmClientHero client={client} attendancePct={attendance.showRatePct} />
 
           <div className="flex flex-wrap gap-2 border-b border-border pb-2">
             {tabs.map((t) => (<Button key={t} type="button" size="sm" variant={tab === t ? "default" : "ghost"} className="rounded-full" onClick={() => setTab(t)}>
@@ -316,7 +290,15 @@ export function ClientDetailView() {
         </motion.div>
 
         <aside className="w-full shrink-0 space-y-4 lg:w-72">
-          <Card className="rounded-2xl border border-border/80 shadow-sm">
+          <ProfileQuickLinks
+            links={[
+              { href: "/calendar", label: "Calendar" },
+              { href: "/clients", label: "All clients" },
+              { href: "/ai", label: "AI Assistant" },
+            ]}
+            hint="Notes and session history stay in this workspace."
+          />
+          <Card className="rounded-2xl border-0 bg-muted/25 shadow-sm">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold">Attendance</CardTitle>
             </CardHeader>
@@ -333,7 +315,7 @@ export function ClientDetailView() {
               </div>
             </CardContent>
           </Card>
-          <Card className="rounded-2xl border border-border/80 shadow-sm">
+          <Card className="rounded-2xl border-0 bg-muted/25 shadow-sm">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold">Workout summary</CardTitle>
             </CardHeader>
